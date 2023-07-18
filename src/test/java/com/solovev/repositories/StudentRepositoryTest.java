@@ -29,6 +29,7 @@ class StudentRepositoryTest {
 
         assertTrue(repo.add(firstStudent));
         assertFalse(repo.add(firstStudent));
+
         assertEquals(1,firstStudent.getId());
 
         assertTrue(repo.add(thirdStudent));
@@ -96,12 +97,12 @@ class StudentRepositoryTest {
      */
     @BeforeEach
     private void initialize() throws IOException {
-        Path pathToEmptyStudents = Path.of("src/test/resources/emptyRepo.json");
+        Path pathToEmptyStudents = Path.of("src/test/resources/emptyStudentsRepo.json");
         String emptyContent = "[]";
         try(FileWriter fileWriter = new FileWriter(pathToEmptyStudents.toFile())){
             fileWriter.write(emptyContent);
         }
-        repo = new StudentRepository(pathToEmptyStudents.toFile());
+        repo = new StudentRepository(pathToEmptyStudents);
         emptyStudent = new Student();
         firstStudent = new Student(1,"first",20,1,1);
         secondStudent = new Student(2,"second",21,2,2);

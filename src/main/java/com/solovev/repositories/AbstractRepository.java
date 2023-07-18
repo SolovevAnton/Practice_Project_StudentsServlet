@@ -16,13 +16,15 @@ import java.util.*;
  */
 public abstract class AbstractRepository implements Repository<IdHolder> {
     private ObjectMapper objectMapper = new ObjectMapper();
-    private Set<IdHolder> values = new HashSet<IdHolder>();
+    private Set<IdHolder> values = new HashSet<>();
     private File fileToStoreData;
 
-    public AbstractRepository(File file) throws IOException {
-        fileToStoreData = file;
-        values = objectMapper.readValue(file, new TypeReference<>() {
-        });
+    public AbstractRepository(Path path) throws IOException {
+        if(Files.exists(path)) {
+            fileToStoreData = path.toFile();
+            values = objectMapper.readValue(fileToStoreData, new TypeReference<>() {
+            });
+        }
     }
 
     /**
@@ -38,8 +40,8 @@ public abstract class AbstractRepository implements Repository<IdHolder> {
         boolean addSuccess = values.add(elem);
         if (addSuccess) {
             elem.setId(maxId + 1);
+            save();
         }
-        save();
         return addSuccess;
     }
 
