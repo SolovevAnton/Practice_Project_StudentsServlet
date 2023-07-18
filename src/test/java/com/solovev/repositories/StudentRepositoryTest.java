@@ -6,11 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -88,7 +86,7 @@ class StudentRepositoryTest {
         assertEquals(emptyStudent,repo.takeData(0));
     }
 
-    private Repository<Student> repo;
+    private AbstractRepository repo;
     private Student emptyStudent;
     private Student firstStudent;
     private Student secondStudent;

@@ -1,8 +1,9 @@
 package com.solovev.model;
 
 import java.util.Objects;
+import java.util.function.ToIntFunction;
 
-public class Student {
+public class Student implements IdHolder{
     private int id;
     private String name;
     private int age;
