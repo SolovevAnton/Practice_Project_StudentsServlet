@@ -70,19 +70,33 @@ public class StudentRepository implements Repository<Student> {
 
     }
 
+
     @Override
     public Collection<Student> takeData() {
-        return null;
+        return students;
     }
-
+    /**
+     * Finds object in the collection by this id
+     * @return first found Object with this id or null if nothing has been found
+     */
     @Override
     public Student takeData(int id) {
-        return null;
+        return students
+                .stream()
+                .filter(student -> student.getId() == id)
+                .findAny()
+                .orElse(null);
     }
 
+    /**
+     * Replace first found object with the ID of the given object with the given object;
+     * @param newElem student to add to the collection to replace the old one with the new student ID!
+     * @return true if object with new id was found and replaced, false otherwise
+     */
     @Override
     public boolean replace(Student newElem) {
-        return false;
+        return delete(newElem.getId())
+                && students.add(newElem);
     }
 
     @Override
