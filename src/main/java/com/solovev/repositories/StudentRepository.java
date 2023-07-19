@@ -15,5 +15,4 @@ public class StudentRepository extends AbstractRepository<Student> {
     public StudentRepository(Path path) throws IOException {
         super(path);
     }
-
 }

@@ -1,21 +1,19 @@
 package com.solovev.model;
 
-import java.time.LocalDate;
-import java.util.Date;
-import java.util.Locale;
+import java.time.Year;
 import java.util.Objects;
 
-public class Car {
+public class Car implements IdHolder{
     private int id;
     private String brand;
     private int power;
-    private LocalDate year;
+    private Year year;
     private int idStudent;
 
     public Car() {
     }
 
-    public Car(int id, String brand, int power, LocalDate year, int idStudent) {
+    public Car(int id, String brand, int power, Year year, int idStudent) {
         this.id = id;
         this.brand = brand;
         this.power = power;
@@ -47,11 +45,11 @@ public class Car {
         this.power = power;
     }
 
-    public LocalDate getYear() {
+    public Year getYear() {
         return year;
     }
 
-    public void setYear(LocalDate year) {
+    public void setYear(Year year) {
         this.year = year;
     }
 

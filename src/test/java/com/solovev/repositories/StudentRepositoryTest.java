@@ -96,7 +96,7 @@ class StudentRepositoryTest {
      * Initialise and reload repo
      */
     @BeforeEach
-    private void initialize() throws IOException {
+    public void initialize() throws IOException {
         Path pathToEmptyStudents = Path.of("src/test/resources/emptyStudentsRepo.json");
         String emptyContent = "[]";
         try(FileWriter fileWriter = new FileWriter(pathToEmptyStudents.toFile())){

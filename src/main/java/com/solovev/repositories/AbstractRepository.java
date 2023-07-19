@@ -16,7 +16,7 @@ import java.util.*;
  * @param <T> must be serializable via Jackson library
  */
 public abstract class AbstractRepository<T extends IdHolder> implements Repository<T> {
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
     private Set<T> values = new HashSet<>();
     private File fileToStoreData;
 
@@ -29,11 +29,11 @@ public abstract class AbstractRepository<T extends IdHolder> implements Reposito
     }
 
     /**
-     * Adds student to the repo;
-     * Only unique students will be added
-     * Note: it changes initial student ID!
-     * @param elem student to add
-     * @return true if student was successfully added, false otherwise;
+     * Adds element to the repo;
+     * Only unique elementwill be added
+     * Note: it changes initial element ID!
+     * @param elem element to add
+     * @return true if element was successfully added, false otherwise;
      */
     @Override
     public boolean add(T elem) {
@@ -46,6 +46,11 @@ public abstract class AbstractRepository<T extends IdHolder> implements Reposito
         return addSuccess;
     }
 
+    /**
+     * Deletes first found object with the given ID
+     * @param elemId id of the element to remove
+     * @return true if element with this ID was found and removed, false otherwise
+     */
     public boolean delete(int elemId) {
         Optional<T> foundStudent = values
                 .stream()
@@ -62,7 +67,10 @@ public abstract class AbstractRepository<T extends IdHolder> implements Reposito
 
     }
 
-
+    /**
+     * method to get content of the repository
+     * @return Original collection(not the copy of it)
+     */
     @Override
     public Collection<T> takeData() {
         return values;
@@ -82,7 +90,7 @@ public abstract class AbstractRepository<T extends IdHolder> implements Reposito
 
     /**
      * Replace first found object with the ID of the given object with the given object;
-     * @param newElem student to add to the collection to replace the old one with the new student ID!
+     * @param newElem object to add to the collection to replace the old one with the new object ID!
      * @return true if object with new id was found and replaced, false otherwise
      */
     @Override
