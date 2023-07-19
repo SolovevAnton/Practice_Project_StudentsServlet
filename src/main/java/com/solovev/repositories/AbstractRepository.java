@@ -13,10 +13,11 @@ import java.util.*;
 
 /**
  * Class to store values as a repository
+ * @param <T> must be serializable via Jackson library
  */
-public abstract class AbstractRepository implements Repository<IdHolder> {
+public abstract class AbstractRepository<T extends IdHolder> implements Repository<T> {
     private ObjectMapper objectMapper = new ObjectMapper();
-    private Set<IdHolder> values = new HashSet<>();
+    private Set<T> values = new HashSet<>();
     private File fileToStoreData;
 
     public AbstractRepository(Path path) throws IOException {
@@ -35,7 +36,7 @@ public abstract class AbstractRepository implements Repository<IdHolder> {
      * @return true if student was successfully added, false otherwise;
      */
     @Override
-    public boolean add(IdHolder elem) {
+    public boolean add(T elem) {
         int maxId = values.stream().mapToInt(IdHolder::getId).max().orElse(-1);
         boolean addSuccess = values.add(elem);
         if (addSuccess) {
@@ -46,7 +47,7 @@ public abstract class AbstractRepository implements Repository<IdHolder> {
     }
 
     public boolean delete(int elemId) {
-        Optional<IdHolder> foundStudent = values
+        Optional<T> foundStudent = values
                 .stream()
                 .filter(idHolder -> idHolder.getId() == elemId)
                 .findFirst();
@@ -63,7 +64,7 @@ public abstract class AbstractRepository implements Repository<IdHolder> {
 
 
     @Override
-    public Collection<IdHolder> takeData() {
+    public Collection<T> takeData() {
         return values;
     }
     /**
@@ -71,7 +72,7 @@ public abstract class AbstractRepository implements Repository<IdHolder> {
      * @return first found Object with this id or null if nothing has been found
      */
     @Override
-    public IdHolder takeData(int id) {
+    public T takeData(int id) {
         return values
                 .stream()
                 .filter(idHolder -> idHolder.getId() == id)
@@ -85,7 +86,7 @@ public abstract class AbstractRepository implements Repository<IdHolder> {
      * @return true if object with new id was found and replaced, false otherwise
      */
     @Override
-    public boolean replace(IdHolder newElem) {
+    public boolean replace(T newElem) {
         return delete(newElem.getId())
                 && values.add(newElem);
     }

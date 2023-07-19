@@ -87,7 +87,7 @@ class StudentRepositoryTest {
         assertEquals(emptyStudent,repo.takeData(0));
     }
 
-    private AbstractRepository repo;
+    private AbstractRepository<Student> repo;
     private Student emptyStudent;
     private Student firstStudent;
     private Student secondStudent;
