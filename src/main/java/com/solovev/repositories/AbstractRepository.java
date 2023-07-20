@@ -1,18 +1,20 @@
 package com.solovev.repositories;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.solovev.model.IdHolder;
+import com.solovev.model.Student;
 import com.solovev.util.Constants;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
 /**
  * Class to store values as a repository
+ *
  * @param <T> must be serializable via Jackson library
  */
 public abstract class AbstractRepository<T extends IdHolder> implements Repository<T> {
@@ -21,10 +23,12 @@ public abstract class AbstractRepository<T extends IdHolder> implements Reposito
     private File fileToStoreData;
 
     public AbstractRepository(Path path) throws IOException {
-        if(Files.exists(path)) {
+        if (Files.exists(path)) {
             fileToStoreData = path.toFile();
-            values = objectMapper.readValue(fileToStoreData, new TypeReference<>() {
-            });
+            try(Reader readerStream = new FileReader(fileToStoreData)) {
+                MappingIterator<T> iterator = objectMapper.reader().forType(Student.class).readValues(readerStream);
+                iterator.forEachRemaining(values::add);
+            }
         }
     }
 
@@ -32,6 +36,7 @@ public abstract class AbstractRepository<T extends IdHolder> implements Reposito
      * Adds element to the repo;
      * Only unique elementwill be added
      * Note: it changes initial element ID!
+     *
      * @param elem element to add
      * @return true if element was successfully added, false otherwise;
      */
@@ -48,6 +53,7 @@ public abstract class AbstractRepository<T extends IdHolder> implements Reposito
 
     /**
      * Deletes first found object with the given ID
+     *
      * @param elemId id of the element to remove
      * @return true if element with this ID was found and removed, false otherwise
      */
@@ -69,14 +75,17 @@ public abstract class AbstractRepository<T extends IdHolder> implements Reposito
 
     /**
      * method to get content of the repository
+     *
      * @return Original collection(not the copy of it)
      */
     @Override
     public Collection<T> takeData() {
         return values;
     }
+
     /**
      * Finds object in the collection by this id
+     *
      * @return first found Object with this id or null if nothing has been found
      */
     @Override
@@ -90,6 +99,7 @@ public abstract class AbstractRepository<T extends IdHolder> implements Reposito
 
     /**
      * Replace first found object with the ID of the given object with the given object;
+     *
      * @param newElem object to add to the collection to replace the old one with the new object ID!
      * @return true if object with new id was found and replaced, false otherwise
      */
@@ -101,10 +111,12 @@ public abstract class AbstractRepository<T extends IdHolder> implements Reposito
 
     @Override
     public void save() {
-        try {
-            objectMapper.writeValue(fileToStoreData, values);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (fileToStoreData != null) {
+            try {
+                objectMapper.writeValue(fileToStoreData, values);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

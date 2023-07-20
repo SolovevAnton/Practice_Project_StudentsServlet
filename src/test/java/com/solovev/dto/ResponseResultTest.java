@@ -12,16 +12,24 @@ class ResponseResultTest {
     @Test
     public void serializationTest() throws JsonProcessingException {
         assertEquals("{}",respToString(empty));
-        assertEquals("{\"message\":\"only\"}",respToString(onlyMsg));;
-        assertEquals("{\"data\":1}",respToString(onlyData));;
+        assertEquals("{\"message\":\"only\"}",respToString(onlyMsg));
+        assertEquals("{\"data\":1}",respToString(onlyData));
         assertEquals("{\"message\":\"one\",\"data\":1}",respToString(full));
+    }
+
+    @Test
+    void jsonToString() throws JsonProcessingException {
+        assertEquals(empty.jsonToString(),respToString(empty));
+        assertEquals(onlyMsg.jsonToString(),respToString(onlyMsg));
+        assertEquals(onlyData.jsonToString(),respToString(onlyData));
+        assertEquals(full.jsonToString(),respToString(full));
     }
     @ParameterizedTest
     @NullSource
     public void serializationNullTest(ResponseResult resp) throws JsonProcessingException {
         assertNull(respToString(resp));
     }
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private ResponseResult<Integer> empty = new ResponseResult<>();
     private ResponseResult<Integer> onlyMsg = new ResponseResult<>("only");
     private ResponseResult<Integer> onlyData = new ResponseResult<>(1);
@@ -35,4 +43,6 @@ class ResponseResultTest {
     private <T> String respToString(ResponseResult<T> responseResult) throws JsonProcessingException {
         return objectMapper.writeValueAsString(responseResult);
     }
+
+
 }
