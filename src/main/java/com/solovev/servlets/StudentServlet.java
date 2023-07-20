@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Map;
 
 @WebServlet("/students")
 public class StudentServlet extends HttpServlet {
@@ -60,12 +59,37 @@ public class StudentServlet extends HttpServlet {
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doPut(req, resp);
+            req.setCharacterEncoding("utf-8");
+            resp.setCharacterEncoding("utf-8");
+            resp.setContentType("application/json;charset=utf-8");
+
+
+            //us object was found and updated returns true if not returns false
+            ResponseResult<Boolean> responseResult = new ResponseResult<>();
+            String idString = req.getParameter("id");
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doDelete(req, resp);
+        req.setCharacterEncoding("utf-8");
+        resp.setCharacterEncoding("utf-8");
+        resp.setContentType("application/json;charset=utf-8");
+
+
+        //if successfully deleted returns true, false otherwise
+        ResponseResult<Boolean> responseResult = new ResponseResult<>();
+        String idString = req.getParameter("id");
+
+        if (idString != null) {
+            try {
+                Repository<Student> repo = new StudentRepository();
+                int id = Integer.parseInt(idString);
+                responseResult.setData(repo.delete(id));
+            } catch (NumberFormatException e) {
+                responseResult.setMessage(e + " Id must be an integer");
+            }
+        }
+        resp.getWriter().write(responseResult.jsonToString());
     }
 
     /**
