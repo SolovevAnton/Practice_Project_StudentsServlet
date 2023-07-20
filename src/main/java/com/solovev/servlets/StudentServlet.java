@@ -22,7 +22,7 @@ public class StudentServlet extends HttpServlet {
         resp.setCharacterEncoding("utf-8");
         resp.setContentType("application/json;charset=utf-8");
         String idString = req.getParameter("id");
-        Repository<Student> repo = new StudentRepository();
+        Repository<Student> repo = new StudentRepository(); //toDo problem with file! How top go around?
 
         if (idString != null) {
             ResponseResult<Student> result = new ResponseResult<>();
@@ -42,7 +42,12 @@ public class StudentServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doPost(req, resp);
+        req.setCharacterEncoding("utf-8");
+        resp.setCharacterEncoding("utf-8");
+        resp.setContentType("application/json;charset=utf-8");
+        String idString = req.getParameter("id");
+        Repository<Student> repo = new StudentRepository();
+
     }
 
     @Override

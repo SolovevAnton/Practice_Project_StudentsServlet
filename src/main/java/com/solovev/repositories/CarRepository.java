@@ -14,4 +14,9 @@ public class CarRepository extends AbstractRepository<Car> {
     public CarRepository(Path path) throws IOException {
         super(path);
     }
+
+    @Override
+    public Class<Car> getType() {
+        return Car.class;
+    }
 }

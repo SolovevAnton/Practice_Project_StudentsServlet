@@ -2,9 +2,15 @@ package com.solovev.dto;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.solovev.model.Student;
+import com.solovev.repositories.Repository;
+import com.solovev.repositories.StudentRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
+
+import java.io.IOException;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,6 +29,17 @@ class ResponseResultTest {
         assertEquals(onlyMsg.jsonToString(),respToString(onlyMsg));
         assertEquals(onlyData.jsonToString(),respToString(onlyData));
         assertEquals(full.jsonToString(),respToString(full));
+    }
+    @Test
+    void gettingDataInt() throws IOException {
+        ResponseResult<Student> result = new ResponseResult<>();
+        result.setData(new Student());
+        assertEquals(new Student(),result.getData());
+
+        Repository<Student> repo = new StudentRepository(Path.of("src/test/resources/testStudentsData.json"));
+        result.setData(repo.takeData(0));
+        assertEquals(new Student(),result.getData());
+
     }
     @ParameterizedTest
     @NullSource

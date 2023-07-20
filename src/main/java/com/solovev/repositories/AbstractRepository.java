@@ -26,12 +26,17 @@ public abstract class AbstractRepository<T extends IdHolder> implements Reposito
         if (Files.exists(path)) {
             fileToStoreData = path.toFile();
             try(Reader readerStream = new FileReader(fileToStoreData)) {
-                MappingIterator<T> iterator = objectMapper.reader().forType(Student.class).readValues(readerStream);
+                MappingIterator<T> iterator = objectMapper.reader().forType(getType()).readValues(readerStream);
                 iterator.forEachRemaining(values::add);
             }
         }
     }
 
+    /**
+     * Method use for Json to know what exact class it must deserialize
+     * @return Class instance of the class that should be deserialized by jackson
+     */
+    public abstract Class<T> getType();
     /**
      * Adds element to the repo;
      * Only unique elementwill be added
@@ -118,5 +123,26 @@ public abstract class AbstractRepository<T extends IdHolder> implements Reposito
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AbstractRepository<?> that = (AbstractRepository<?>) o;
+        return Objects.equals(objectMapper, that.objectMapper) && Objects.equals(values, that.values) && Objects.equals(fileToStoreData, that.fileToStoreData);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(objectMapper, values, fileToStoreData);
+    }
+
+    @Override
+    public String toString() {
+        return "AbstractRepository{" +
+                ", values=" + values +
+                ", fileToStoreData=" + fileToStoreData +
+                '}';
     }
 }

@@ -27,7 +27,7 @@ class StudentRepositoryTest {
 
         @Test
         void readAddingTest() throws IOException {
-            StudentRepository realRepo = new StudentRepository();
+            Repository<Student> realRepo = new StudentRepository();
             realRepo.add(new Student());
             assertEquals(new Student(),realRepo.takeData(0));
         }
@@ -35,7 +35,6 @@ class StudentRepositoryTest {
         void findingTest() throws IOException {
             StudentRepository realRepo = new StudentRepository();
            assertEquals(new Student(), realRepo.takeData(0));
-
         }
     }
 

@@ -1,5 +1,6 @@
 package com.solovev.repositories;
 
+import com.solovev.model.Car;
 import com.solovev.model.Student;
 import com.solovev.util.Constants;
 
@@ -14,5 +15,9 @@ public class StudentRepository extends AbstractRepository<Student> {
 
     public StudentRepository(Path path) throws IOException {
         super(path);
+    }
+    @Override
+    public Class<Student> getType() {
+        return Student.class;
     }
 }

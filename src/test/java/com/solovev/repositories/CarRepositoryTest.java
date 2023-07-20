@@ -18,9 +18,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class CarRepositoryTest {
     @ParameterizedTest
     @NullSource
-    void nullTests(Car car){
-        assertThrows(NullPointerException.class,()-> carRepo.add(car));
-        assertThrows(NullPointerException.class,()-> carRepo.replace(car));
+    void nullTests(Car car) {
+        assertThrows(NullPointerException.class, () -> carRepo.add(car));
+        assertThrows(NullPointerException.class, () -> carRepo.replace(car));
     }
 
     @Test
@@ -88,11 +88,23 @@ class CarRepositoryTest {
         assertEquals(emptyCar, carRepo.takeData(0));
     }
 
+    @Test
+    void creationFromSource() throws IOException {
+        Repository<Car> repo = new CarRepository(Path.of("src/test/resources/testCarData.json"));
+    }
+
+    @Test
+    void gettingFromSource() throws IOException {
+        Repository<Car> repo = new CarRepository(Path.of("src/test/resources/testCarData.json"));
+        assertEquals(new Car(), repo.takeData(0));
+    }
+
     private AbstractRepository<Car> carRepo;
     private Car emptyCar;
     private Car firstCar;
     private Car secondCar;
     private Car thirdCar;
+
     /**
      * Initialise and reload repo
      */
@@ -100,20 +112,20 @@ class CarRepositoryTest {
     private void initialize() throws IOException {
         Path pathToEmptyStudents = Path.of("src/test/resources/emptyCarRepo.json");
         String emptyContent = "[]";
-        try(FileWriter fileWriter = new FileWriter(pathToEmptyStudents.toFile())){
+        try (FileWriter fileWriter = new FileWriter(pathToEmptyStudents.toFile())) {
             fileWriter.write(emptyContent);
         }
         carRepo = new CarRepository(pathToEmptyStudents);
         emptyCar = new Car();
-        firstCar = new Car(1,"Audi",1, Year.of(2000),1);
-        secondCar = new Car(2,"BMW",2, Year.of(2001),2);
-        thirdCar = new Car(3,"Reno",3, Year.of(2002),3);
+        firstCar = new Car(1, "Audi", 1, Year.of(2000), 1);
+        secondCar = new Car(2, "BMW", 2, Year.of(2001), 2);
+        thirdCar = new Car(3, "Reno", 3, Year.of(2002), 3);
     }
 
     /**
      * Fills repo with all the students starting from the empty one
      */
-    private void fillRepo(){
+    private void fillRepo() {
         carRepo.add(emptyCar);
         carRepo.add(firstCar);
         carRepo.add(secondCar);
