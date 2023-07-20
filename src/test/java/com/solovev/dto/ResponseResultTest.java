@@ -44,7 +44,7 @@ class ResponseResultTest {
     @ParameterizedTest
     @NullSource
     public void serializationNullTest(ResponseResult resp) throws JsonProcessingException {
-        assertNull(respToString(resp));
+        assertEquals("null",respToString(resp));
     }
     private final ObjectMapper objectMapper = new ObjectMapper();
     private ResponseResult<Integer> empty = new ResponseResult<>();

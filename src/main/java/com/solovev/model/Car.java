@@ -61,26 +61,23 @@ public class Car implements IdHolder{
         this.idStudent = idStudent;
     }
 
+    /**
+     * NOTE: ID does not included in equals, since it computes out of the object
+     * @param o object to compare
+     * @return true if objects are logically equal (EXCEPT ID FIELD) false otherwise
+     */
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Car car)) return false;
-
-        if (id != car.id) return false;
-        if (power != car.power) return false;
-        if (idStudent != car.idStudent) return false;
-        if (!Objects.equals(brand, car.brand)) return false;
-        return Objects.equals(year, car.year);
+        if (o == null || getClass() != o.getClass()) return false;
+        Car car = (Car) o;
+        return power == car.power && idStudent == car.idStudent && Objects.equals(brand, car.brand) && Objects.equals(year, car.year);
     }
 
     @Override
     public int hashCode() {
-        int result = id;
-        result = 31 * result + (brand != null ? brand.hashCode() : 0);
-        result = 31 * result + power;
-        result = 31 * result + (year != null ? year.hashCode() : 0);
-        result = 31 * result + idStudent;
-        return result;
+        return Objects.hash(brand, power, year, idStudent);
     }
 
     @Override

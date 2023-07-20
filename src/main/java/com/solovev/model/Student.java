@@ -61,17 +61,22 @@ public class Student implements IdHolder{
         this.salary = salary;
     }
 
+    /**
+     * NOTE: ID does not included in equals, since it computes out of the object
+     * @param o object to compare
+     * @return true if objects are logically equal (EXCEPT ID FIELD) false otherwise
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Student student = (Student) o;
-        return id == student.id && age == student.age && num == student.num && salary == student.salary && Objects.equals(name, student.name);
+        return age == student.age && num == student.num && salary == student.salary && Objects.equals(name, student.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, age, num, salary);
+        return Objects.hash(name, age, num, salary);
     }
 
     @Override

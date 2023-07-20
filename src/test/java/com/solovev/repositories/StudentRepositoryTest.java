@@ -18,8 +18,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class StudentRepositoryTest {
     @Nested
     class RealRepositoryTest {
-
-
         @Test
         void creationTest() {
             assertAll(StudentRepository::new);
