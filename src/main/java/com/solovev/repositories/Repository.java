@@ -1,9 +1,6 @@
 package com.solovev.repositories;
 
-import com.solovev.model.IdHolder;
-
 import java.util.Collection;
-import java.util.function.ToIntFunction;
 
 public interface Repository<T> {
     boolean add(T elem);

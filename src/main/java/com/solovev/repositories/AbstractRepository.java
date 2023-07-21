@@ -47,7 +47,7 @@ public abstract class AbstractRepository<T extends IdHolder> implements Reposito
      */
     @Override
     public boolean add(T elem) {
-        int maxId = values.stream().mapToInt(IdHolder::getId).max().orElse(-1);
+        int maxId = values.stream().mapToInt(IdHolder::getId).max().orElse(0);
         boolean addSuccess = values.add(elem);
         if (addSuccess) {
             elem.setId(maxId + 1);

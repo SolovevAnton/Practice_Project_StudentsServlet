@@ -15,9 +15,9 @@ import java.util.Collection;
 
 @WebServlet("/students")
 public class StudentServlet extends HttpServlet {
-
+//todo can servlet be abstract
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         req.setCharacterEncoding("utf-8");
         resp.setCharacterEncoding("utf-8");
         resp.setContentType("application/json;charset=utf-8");
@@ -28,7 +28,13 @@ public class StudentServlet extends HttpServlet {
             ResponseResult<Student> result = new ResponseResult<>();
             try {
                 int id = Integer.parseInt(idString);
-                result.setData(repo.takeData(id));
+                Student foundStudent = repo.takeData(id);
+
+                if(foundStudent != null){
+                    result.setData(repo.takeData(id));
+                } else {
+                    result.setMessage("Student with this ID was not found");
+                }
             } catch (NumberFormatException e) {
                 result.setMessage(e + " Id must be an integer");
             }
@@ -46,11 +52,16 @@ public class StudentServlet extends HttpServlet {
         resp.setCharacterEncoding("utf-8");
         resp.setContentType("application/json;charset=utf-8");
         Repository<Student> repo = new StudentRepository();
-        ResponseResult<Boolean> responseResult = new ResponseResult<>();
+        ResponseResult<Student> responseResult = new ResponseResult<>();
 
         try {
             //if successfully created and added returns true, false otherwise
-            responseResult.setData(repo.add(studentModifier(req, new Student())));
+            Student studentToAdd = studentModifier(req, new Student());
+            if(repo.add(studentToAdd)) {
+                responseResult.setData(studentToAdd);
+            } else {
+                responseResult.setMessage("This object already exists in database");
+            }
         } catch (NumberFormatException e) {
             responseResult.setMessage(e.toString());
         }
@@ -66,7 +77,7 @@ public class StudentServlet extends HttpServlet {
 
             //us object was found and updated returns true if not returns false
             ResponseResult<Boolean> responseResult = new ResponseResult<>();
-            String idString = req.getParameter("id");
+            String idString = req.getParameter("id"); //todo finish
     }
 
     @Override
@@ -75,16 +86,20 @@ public class StudentServlet extends HttpServlet {
         resp.setCharacterEncoding("utf-8");
         resp.setContentType("application/json;charset=utf-8");
 
-
         //if successfully deleted returns true, false otherwise
-        ResponseResult<Boolean> responseResult = new ResponseResult<>();
+        ResponseResult<Student> responseResult = new ResponseResult<>();
         String idString = req.getParameter("id");
 
         if (idString != null) {
             try {
                 Repository<Student> repo = new StudentRepository();
-                int id = Integer.parseInt(idString);
-                responseResult.setData(repo.delete(id));
+                int id = Integer.parseInt(idString); //todo refactor repo delete
+                Student student = repo.takeData(id);
+                if(repo.delete(id)) {
+                    responseResult.setData(student);
+                } else {
+                    responseResult.setMessage("Cannot find object with this ID");
+                }
             } catch (NumberFormatException e) {
                 responseResult.setMessage(e + " Id must be an integer");
             }
