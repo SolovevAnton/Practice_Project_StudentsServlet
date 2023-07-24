@@ -15,14 +15,14 @@ import java.util.Collection;
 
 @WebServlet("/students")
 public class StudentServlet extends HttpServlet {
-//todo can servlet be abstract
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         req.setCharacterEncoding("utf-8");
         resp.setCharacterEncoding("utf-8");
         resp.setContentType("application/json;charset=utf-8");
+
         String idString = req.getParameter("id");
-        Repository<Student> repo = new StudentRepository(); //toDo problem with file! How top go around?
+        Repository<Student> repo = new StudentRepository();
 
         if (idString != null) {
             ResponseResult<Student> result = new ResponseResult<>();
@@ -55,7 +55,6 @@ public class StudentServlet extends HttpServlet {
         ResponseResult<Student> responseResult = new ResponseResult<>();
 
         try {
-            //if successfully created and added returns true, false otherwise
             Student studentToAdd = studentModifier(req, new Student());
             if(repo.add(studentToAdd)) {
                 responseResult.setData(studentToAdd);
