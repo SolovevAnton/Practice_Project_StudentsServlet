@@ -1,6 +1,7 @@
 package com.solovev.repositories;
 
 import com.solovev.model.Student;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,15 +26,17 @@ class StudentRepositoryTest {
         }
 
         @Test
-        void readAddingTest() throws IOException {
+        void readAddingDeletingTest() throws IOException {
             Repository<Student> realRepo = new StudentRepository();
-            realRepo.add(new Student());
-            assertEquals(new Student(),realRepo.takeData(0));
-        }
-        @Test
-        void findingTest() throws IOException {
-            StudentRepository realRepo = new StudentRepository();
-           assertEquals(new Student(), realRepo.takeData(0));
+            Student studentToTempAdd = new Student();
+            studentToTempAdd.setNum(new Random().nextLong()); // in very rare cases this test might get canceled due to this student already is presented in real repo
+
+            Assumptions.assumeTrue(realRepo.add(studentToTempAdd));
+
+            //finding data test
+            assertSame(studentToTempAdd,realRepo.takeData(realRepo.lastId()));
+
+            assertSame(studentToTempAdd,realRepo.delete(realRepo.lastId()));
         }
     }
 
@@ -46,15 +50,15 @@ class StudentRepositoryTest {
     @Test
     void add() {
         assertTrue(repo.add(emptyStudent));
-        assertEquals(0, emptyStudent.getId());
+        assertEquals(1, emptyStudent.getId());
 
         assertTrue(repo.add(firstStudent));
         assertFalse(repo.add(firstStudent));
 
-        assertEquals(1, firstStudent.getId());
+        assertEquals(2, firstStudent.getId());
 
         assertTrue(repo.add(thirdStudent));
-        assertEquals(2, thirdStudent.getId());
+        assertEquals(3, thirdStudent.getId());
     }
 
     @Test
@@ -62,10 +66,11 @@ class StudentRepositoryTest {
         repo.add(emptyStudent);
         repo.add(firstStudent);
 
-        assertTrue(repo.delete(0));
-        assertFalse(repo.delete(emptyStudent.getId()));
+        assertEquals(emptyStudent,repo.delete(1));
+        assertNull(repo.delete(emptyStudent.getId()));
+
         assertTrue(repo.add(emptyStudent));
-        assertEquals(2, emptyStudent.getId());
+        assertEquals(3, emptyStudent.getId());
     }
 
     @Test
@@ -81,11 +86,11 @@ class StudentRepositoryTest {
         assertNull(repo.takeData(0));
 
         fillRepo();
-        assertEquals(emptyStudent, repo.takeData(0));
-        assertEquals(thirdStudent, repo.takeData(3));
+        assertEquals(emptyStudent, repo.takeData(1));
+        assertEquals(thirdStudent, repo.takeData(4));
 
         assertNull(repo.takeData(-1));
-        assertNull(repo.takeData(4));
+        assertNull(repo.takeData(5));
     }
 
     @Test
@@ -99,13 +104,13 @@ class StudentRepositoryTest {
         assertTrue(repo.replace(emptyReplacement));
         assertTrue(repo.replace(emptyReplacement));
 
-        assertEquals(emptyReplacement, repo.takeData(0));
+        assertEquals(emptyReplacement, repo.takeData(1));
 
         assertTrue(repo.replace(emptyStudent));
 
         emptyReplacement.setId(4);
         assertFalse(repo.replace(emptyReplacement));
-        assertEquals(emptyStudent, repo.takeData(0));
+        assertEquals(emptyStudent, repo.takeData(1));
     }
 
     @Test

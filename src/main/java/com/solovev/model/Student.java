@@ -3,8 +3,8 @@ package com.solovev.model;
 import java.util.Objects;
 import java.util.function.ToIntFunction;
 
-public class Student implements IdHolder{
-    private int id;
+public class Student implements IdHolder {
+    private int id = 1; //id starts from 1
     private String name;
     private int age;
     private long num;
@@ -63,6 +63,7 @@ public class Student implements IdHolder{
 
     /**
      * NOTE: ID does not included in equals, since it computes out of the object
+     *
      * @param o object to compare
      * @return true if objects are logically equal (EXCEPT ID FIELD) false otherwise
      */

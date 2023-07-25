@@ -26,15 +26,15 @@ class CarRepositoryTest {
     @Test
     void add() {
         assertTrue(carRepo.add(emptyCar));
-        assertEquals(0, emptyCar.getId());
+        assertEquals(1, emptyCar.getId());
 
         assertTrue(carRepo.add(firstCar));
         assertFalse(carRepo.add(firstCar));
 
-        assertEquals(1, firstCar.getId());
+        assertEquals(2, firstCar.getId());
 
         assertTrue(carRepo.add(thirdCar));
-        assertEquals(2, thirdCar.getId());
+        assertEquals(3, thirdCar.getId());
     }
 
     @Test
@@ -42,10 +42,10 @@ class CarRepositoryTest {
         carRepo.add(emptyCar);
         carRepo.add(firstCar);
 
-        assertTrue(carRepo.delete(0));
-        assertFalse(carRepo.delete(emptyCar.getId()));
+        assertEquals(emptyCar,carRepo.delete(1));
+        assertNull(carRepo.delete(emptyCar.getId()));
         assertTrue(carRepo.add(emptyCar));
-        assertEquals(2, emptyCar.getId());
+        assertEquals(3, emptyCar.getId());
     }
 
     @Test
@@ -61,11 +61,11 @@ class CarRepositoryTest {
         assertNull(carRepo.takeData(0));
 
         fillRepo();
-        assertEquals(emptyCar, carRepo.takeData(0));
-        assertEquals(thirdCar, carRepo.takeData(3));
+        assertEquals(emptyCar, carRepo.takeData(1));
+        assertEquals(thirdCar, carRepo.takeData(4));
 
         assertNull(carRepo.takeData(-1));
-        assertNull(carRepo.takeData(4));
+        assertNull(carRepo.takeData(5));
     }
 
     @Test
@@ -79,13 +79,13 @@ class CarRepositoryTest {
         assertTrue(carRepo.replace(emptyReplacement));
         assertTrue(carRepo.replace(emptyReplacement));
 
-        assertEquals(emptyReplacement, carRepo.takeData(0));
+        assertEquals(emptyReplacement, carRepo.takeData(1));
 
         assertTrue(carRepo.replace(emptyCar));
 
         emptyReplacement.setId(4);
         assertFalse(carRepo.replace(emptyReplacement));
-        assertEquals(emptyCar, carRepo.takeData(0));
+        assertEquals(emptyCar, carRepo.takeData(1));
     }
 
     @Test

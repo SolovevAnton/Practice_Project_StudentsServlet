@@ -39,7 +39,8 @@ public abstract class AbstractRepository<T extends IdHolder> implements Reposito
     public abstract Class<T> getType();
     /**
      * Adds element to the repo;
-     * Only unique elementwill be added
+     * Only unique element will be added
+     * Id starts from 1
      * Note: it changes initial element ID!
      *
      * @param elem element to add
@@ -47,7 +48,7 @@ public abstract class AbstractRepository<T extends IdHolder> implements Reposito
      */
     @Override
     public boolean add(T elem) {
-        int maxId = values.stream().mapToInt(IdHolder::getId).max().orElse(0);
+        int maxId = lastId();
         boolean addSuccess = values.add(elem);
         if (addSuccess) {
             elem.setId(maxId + 1);
@@ -57,12 +58,22 @@ public abstract class AbstractRepository<T extends IdHolder> implements Reposito
     }
 
     /**
+     * Finds max id for collection in this repo
+     * @return max ID of this repo, or 0 if collection is empty
+     */
+    @Override
+    public int lastId(){
+        return values.stream().mapToInt(IdHolder::getId).max().orElse(0);
+    }
+
+    /**
      * Deletes first found object with the given ID
      *
      * @param elemId id of the element to remove
-     * @return true if element with this ID was found and removed, false otherwise
+     * @return elemant if element with this ID was found and removed, null otherwise
      */
-    public boolean delete(int elemId) {
+    @Override
+    public T delete(int elemId) {
         Optional<T> foundStudent = values
                 .stream()
                 .filter(idHolder -> idHolder.getId() == elemId)
@@ -74,8 +85,12 @@ public abstract class AbstractRepository<T extends IdHolder> implements Reposito
                     save();
                 }
         );
-        return foundStudent.isPresent();
+        return foundStudent.orElse(null);
+    }
 
+    @Override
+    public int size() {
+        return values.size();
     }
 
     /**
@@ -110,7 +125,7 @@ public abstract class AbstractRepository<T extends IdHolder> implements Reposito
      */
     @Override
     public boolean replace(T newElem) {
-        return delete(newElem.getId())
+        return (delete(newElem.getId()) != null)
                 && values.add(newElem);
     }
 
