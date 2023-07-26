@@ -1,6 +1,7 @@
 package com.solovev.repositories;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.solovev.model.IdHolder;
@@ -125,8 +126,12 @@ public abstract class AbstractRepository<T extends IdHolder> implements Reposito
      */
     @Override
     public boolean replace(T newElem) {
-        return (delete(newElem.getId()) != null)
+        int idToReplace = newElem.getId();
+        boolean replaceSuccess = (delete(newElem.getId()) != null)
                 && values.add(newElem);
+        newElem.setId(idToReplace);
+        save();
+        return replaceSuccess;
     }
 
     @Override

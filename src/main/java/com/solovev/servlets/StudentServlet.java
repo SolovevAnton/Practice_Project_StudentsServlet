@@ -30,10 +30,10 @@ public class StudentServlet extends HttpServlet {
                 int id = Integer.parseInt(idString);
                 Student foundStudent = repo.takeData(id);
 
-                if(foundStudent != null){
+                if (foundStudent != null) {
                     result.setData(repo.takeData(id));
                 } else {
-                    result.setMessage("Student with this ID was not found");
+                    result.setMessage("Cannot find object with this ID");
                 }
             } catch (NumberFormatException e) {
                 result.setMessage(e + " Id must be an integer");
@@ -55,8 +55,8 @@ public class StudentServlet extends HttpServlet {
         ResponseResult<Student> responseResult = new ResponseResult<>();
 
         try {
-            Student studentToAdd = studentModifier(req, new Student());
-            if(repo.add(studentToAdd)) {
+            Student studentToAdd = studentModifier(req);
+            if (repo.add(studentToAdd)) {
                 responseResult.setData(studentToAdd);
             } else {
                 responseResult.setMessage("This object already exists in database");
@@ -67,17 +67,47 @@ public class StudentServlet extends HttpServlet {
         resp.getWriter().write(responseResult.jsonToString());
     }
 
+    /**
+     * Updates student in the repo based on its id
+     *
+     * @param req  request must contain all filds with id
+     * @param resp response will contain REPLACED object
+     * @throws ServletException
+     * @throws IOException
+     */
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-            req.setCharacterEncoding("utf-8");
-            resp.setCharacterEncoding("utf-8");
-            resp.setContentType("application/json;charset=utf-8");
+        req.setCharacterEncoding("utf-8");
+        resp.setCharacterEncoding("utf-8");
+        resp.setContentType("application/json;charset=utf-8");
 
+        //us object was found and updated returns old object else throws
 
-            //us object was found and updated returns true if not returns false
-            ResponseResult<Boolean> responseResult = new ResponseResult<>();
-            String idString = req.getParameter("id"); //todo finish
+        ResponseResult<Student> responseResult = new ResponseResult<>();
+        String idString = req.getParameter("id");
+
+        if (idString != null) {
+            try {
+                Repository<Student> repo = new StudentRepository();
+                int id = Integer.parseInt(idString);
+
+                Student studentToCreate = studentModifier(req);
+                studentToCreate.setId(id);
+
+                Student studentToReplace = repo.takeData(id);
+
+                if (repo.replace(studentToCreate)) {
+                    responseResult.setData(studentToReplace);
+                } else {
+                    responseResult.setMessage("Cannot find object with this ID");
+                }
+            } catch (NumberFormatException e) {
+                responseResult.setMessage(e.toString());
+            }
+        }
+        resp.getWriter().write(responseResult.jsonToString());
     }
+
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -92,9 +122,9 @@ public class StudentServlet extends HttpServlet {
         if (idString != null) {
             try {
                 Repository<Student> repo = new StudentRepository();
-                int id = Integer.parseInt(idString); //todo refactor repo delete
-                Student student = repo.takeData(id);
-                if(repo.delete(id)) {
+                int id = Integer.parseInt(idString);
+                Student student = repo.delete(id);
+                if (student != null) {
                     responseResult.setData(student);
                 } else {
                     responseResult.setMessage("Cannot find object with this ID");
@@ -102,6 +132,8 @@ public class StudentServlet extends HttpServlet {
             } catch (NumberFormatException e) {
                 responseResult.setMessage(e + " Id must be an integer");
             }
+        } else {
+            responseResult.setMessage("Please provide object ID");
         }
         resp.getWriter().write(responseResult.jsonToString());
     }
@@ -110,11 +142,11 @@ public class StudentServlet extends HttpServlet {
      * Modifies student based on given parameters of the request, if they are presented
      *
      * @param req     to take param from
-     * @param student to modify
      * @return modified student
      * @throws NumberFormatException if one of the parsed number parameters cannot be parsed
      */
-    private Student studentModifier(HttpServletRequest req, Student student) throws NumberFormatException {
+    private Student studentModifier(HttpServletRequest req) throws NumberFormatException {
+        Student student = new Student();
         if (req.getParameter("name") != null) {
             student.setName(req.getParameter("name"));
         }
