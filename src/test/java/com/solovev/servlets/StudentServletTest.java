@@ -35,7 +35,7 @@ public class StudentServletTest {
 
             Student existingStudent = repo.takeData().stream().findAny().get();
 
-            when(request.getParameter("name")).thenReturn(String.valueOf(existingStudent.getName()));
+            when(request.getParameter("name")).thenReturn(existingStudent.getName());
             when(request.getParameter("age")).thenReturn(String.valueOf(existingStudent.getAge()));
             when(request.getParameter("num")).thenReturn(String.valueOf(existingStudent.getNum()));
             when(request.getParameter("salary")).thenReturn(String.valueOf(existingStudent.getSalary()));

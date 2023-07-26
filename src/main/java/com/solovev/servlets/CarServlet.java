@@ -5,11 +5,15 @@ import com.solovev.model.Car;
 import com.solovev.repositories.CarRepository;
 import com.solovev.repositories.Repository;
 
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.Year;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Collection;
 
 @WebServlet("/car")
@@ -31,7 +35,30 @@ public class CarServlet extends HttpServlet {
         repo = new CarRepository();
         responseResult = new ResponseResult<>();
     }
-
+    /**
+     * Creates car based on given parameters of the request, if they are presented
+     *
+     * @param req     to take param from
+     * @return modified student
+     * @throws NumberFormatException if one of the parsed number parameters cannot be parsed
+     * @throws java.time.format.DateTimeParseException if year will not be parsed correctly
+     */
+    private Car carCreator(HttpServletRequest req) throws NumberFormatException {
+        Car car = new Car();
+        if (req.getParameter("brand") != null) {
+            car.setBrand(req.getParameter("brand"));
+        }
+        if (req.getParameter("power") != null) {
+            car.setPower(Integer.parseInt(req.getParameter("power")));
+        }
+        if (req.getParameter("year") != null) {
+            car.setYear(Year.parse(req.getParameter("year"), DateTimeFormatter.ofPattern("yyyy")));
+        }
+        if (req.getParameter("idStudent") != null) {
+            car.setIdStudent(Integer.parseInt(req.getParameter("idStudent")));
+        }
+        return car;
+    }
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         config(req, resp);
@@ -55,5 +82,22 @@ public class CarServlet extends HttpServlet {
             allCarsResponse.setData(repo.takeData());
             resp.getWriter().write(allCarsResponse.jsonToString());
         }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        config(req,resp);
+
+        try {
+            Car carToAdd = carCreator(req);
+            if(repo.add(carToAdd)){
+                responseResult.setData(carToAdd);
+            } else {
+                responseResult.setMessage("This object already exists in database");
+            }
+        } catch (NumberFormatException | DateTimeParseException e){
+            responseResult.setMessage(e.toString());
+        }
+        resp.getWriter().write(responseResult.jsonToString());
     }
 }
