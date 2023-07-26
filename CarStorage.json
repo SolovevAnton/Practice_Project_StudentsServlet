@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "brand": "Audi",
+    "power": 1,
+    "year": 2000,
+    "idStudent": 1
+  },
+  {
+    "id": 3,
+    "brand": "Reno",
+    "power": 3,
+    "year": 2002,
+    "idStudent": 3
+  },
+  {
+    "id": 2,
+    "brand": "BMW",
+    "power": 2,
+    "year": 2001,
+    "idStudent": 2
+  }
+]

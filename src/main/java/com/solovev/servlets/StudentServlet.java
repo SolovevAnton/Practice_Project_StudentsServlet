@@ -55,7 +55,7 @@ public class StudentServlet extends HttpServlet {
         ResponseResult<Student> responseResult = new ResponseResult<>();
 
         try {
-            Student studentToAdd = studentModifier(req);
+            Student studentToAdd = studentCreator(req);
             if (repo.add(studentToAdd)) {
                 responseResult.setData(studentToAdd);
             } else {
@@ -91,7 +91,7 @@ public class StudentServlet extends HttpServlet {
                 Repository<Student> repo = new StudentRepository();
                 int id = Integer.parseInt(idString);
 
-                Student studentToCreate = studentModifier(req);
+                Student studentToCreate = studentCreator(req);
                 studentToCreate.setId(id);
 
                 Student studentToReplace = repo.takeData(id);
@@ -139,13 +139,13 @@ public class StudentServlet extends HttpServlet {
     }
 
     /**
-     * Modifies student based on given parameters of the request, if they are presented
+     * Creates student based on given parameters of the request, if they are presented
      *
      * @param req     to take param from
      * @return modified student
      * @throws NumberFormatException if one of the parsed number parameters cannot be parsed
      */
-    private Student studentModifier(HttpServletRequest req) throws NumberFormatException {
+    private Student studentCreator(HttpServletRequest req) throws NumberFormatException {
         Student student = new Student();
         if (req.getParameter("name") != null) {
             student.setName(req.getParameter("name"));
