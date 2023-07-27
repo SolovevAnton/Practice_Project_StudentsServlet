@@ -75,6 +75,7 @@ class CarRepositoryTest {
         fillRepo();
 
         Car emptyReplacement = new Car();
+        emptyReplacement.setId(1); //otherwise will not be replaced
 
         assertTrue(carRepo.replace(emptyReplacement));
         assertTrue(carRepo.replace(emptyReplacement));
@@ -90,7 +91,7 @@ class CarRepositoryTest {
 
     @Test
     void creationFromSource() throws IOException {
-        Repository<Car> repo = new CarRepository(Path.of("src/test/resources/testCarData.json"));
+        assertAll(()->new CarRepository(Path.of("src/test/resources/testCarData.json")));
     }
 
     @Test
@@ -109,7 +110,7 @@ class CarRepositoryTest {
      * Initialise and reload repo
      */
     @BeforeEach
-    private void initialize() throws IOException {
+    public void initialize() throws IOException {
         Path pathToEmptyStudents = Path.of("src/test/resources/emptyCarRepo.json");
         String emptyContent = "[]";
         try (FileWriter fileWriter = new FileWriter(pathToEmptyStudents.toFile())) {

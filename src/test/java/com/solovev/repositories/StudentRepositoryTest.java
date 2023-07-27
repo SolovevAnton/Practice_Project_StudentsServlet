@@ -21,7 +21,7 @@ class StudentRepositoryTest {
     @Nested
     class RealRepositoryTest {
         @Test
-        void readAddingDeletingTest() throws IOException {
+        void readAddingDeletingTest() {
             Student studentToTempAdd = new Student();
             studentToTempAdd.setNum(new Random().nextLong()); // in very rare cases this test might get canceled due to this student already is presented in real repo
 
@@ -33,7 +33,7 @@ class StudentRepositoryTest {
             assertSame(studentToTempAdd,realRepo.delete(realRepo.lastId()));
         }
         @Test
-        void realReplaceTest() throws IOException {
+        void realReplaceTest(){
             Student studentToTempAdd = new Student();
             studentToTempAdd.setNum(new Random().nextLong()); // in very rare cases this test might get canceled due to this student already is presented in real repo
 
@@ -60,7 +60,7 @@ class StudentRepositoryTest {
         }
         private Repository<Student> realRepo;
         @BeforeEach
-        private void reloadRepo() throws IOException {
+        public void reloadRepo() throws IOException {
             realRepo = new StudentRepository();
         }
     }
@@ -130,7 +130,7 @@ class StudentRepositoryTest {
         fillRepo();
 
         Student emptyReplacement = new Student();
-
+        emptyReplacement.setId(1); //otherwise will not be replaced, since ID starts from 1
         assertTrue(testRepo.replace(emptyReplacement));
         assertTrue(testRepo.replace(emptyReplacement));
 
@@ -145,7 +145,7 @@ class StudentRepositoryTest {
 
     @Test
     void creationFromSource() throws IOException {
-        Repository<Student> repo = new StudentRepository(Path.of("src/test/resources/testStudentsData.json"));
+        assertAll(() -> new StudentRepository(Path.of("src/test/resources/testStudentsData.json")));
     }
     @Test
     void gettingFromSource() throws IOException {
@@ -158,7 +158,7 @@ class StudentRepositoryTest {
     private Student firstStudent;
     private Student secondStudent;
     private Student thirdStudent;
-    private Path pathToEmptyStudents = Path.of("src/test/resources/emptyStudentsRepo.json");
+    private final Path pathToEmptyStudents = Path.of("src/test/resources/emptyStudentsRepo.json");
     /**
      * Initialise and reload repo
      */

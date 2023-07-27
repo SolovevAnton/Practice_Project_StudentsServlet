@@ -17,7 +17,8 @@ import java.util.Collection;
 
 @WebServlet("/students")
 public class StudentServlet extends HttpServlet {
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final String messageNoId = "Please provide object ID";
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -54,8 +55,8 @@ public class StudentServlet extends HttpServlet {
      * If there is object in the request it will be used to post, and all other parameters will be ignored
      *
      * @param req  request with parameters or with object; empty post request results in empty car addition
-     * @param resp
-     * @throws IOException
+     * @param resp response with posted object is success with message otherwise
+     * @throws IOException if IO exc occurs
      */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -84,11 +85,10 @@ public class StudentServlet extends HttpServlet {
      *
      * @param req  request must contain all filds with id
      * @param resp response will contain REPLACED object
-     * @throws ServletException
-     * @throws IOException
+     * @throws IOException if IO exc occurs
      */
     @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         req.setCharacterEncoding("utf-8");
         resp.setCharacterEncoding("utf-8");
         resp.setContentType("application/json;charset=utf-8");
@@ -97,33 +97,40 @@ public class StudentServlet extends HttpServlet {
 
         ResponseResult<Student> responseResult = new ResponseResult<>();
         String idString = req.getParameter("id");
-        Repository<Student> repo = new StudentRepository();
+        boolean isJson = "application/json".equals(req.getHeader("Content-Type"));
 
-
-        if (idString != null) {
+        if (idString != null || isJson) {
             try {
-                int id = Integer.parseInt(idString);
+                Repository<Student> repo = new StudentRepository();
+                int id;
+                Student studentToCreate;
 
-                Student studentToCreate = studentCreator(req);
-                studentToCreate.setId(id);
-
+                if (isJson) {
+                    studentToCreate = objectMapper.readValue(req.getReader(), Student.class);
+                    id = studentToCreate.getId();
+                } else {
+                    id = Integer.parseInt(idString);
+                    studentToCreate = studentCreator(req);
+                    studentToCreate.setId(id);
+                }
                 Student studentToReplace = repo.takeData(id);
-
                 if (repo.replace(studentToCreate)) {
                     responseResult.setData(studentToReplace);
                 } else {
                     responseResult.setMessage("Cannot find object with this ID");
                 }
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException | JsonParseException e) {
                 responseResult.setMessage("Error: " + e);
             }
+        } else {
+            responseResult.setMessage(messageNoId);
         }
         resp.getWriter().write(responseResult.jsonToString());
     }
 
 
     @Override
-    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         req.setCharacterEncoding("utf-8");
         resp.setCharacterEncoding("utf-8");
         resp.setContentType("application/json;charset=utf-8");
@@ -146,7 +153,7 @@ public class StudentServlet extends HttpServlet {
                 responseResult.setMessage(e + " Id must be an integer");
             }
         } else {
-            responseResult.setMessage("Please provide object ID");
+            responseResult.setMessage(messageNoId);
         }
         resp.getWriter().write(responseResult.jsonToString());
     }

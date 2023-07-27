@@ -4,7 +4,7 @@ import java.time.Year;
 import java.util.Objects;
 
 public class Car implements IdHolder {
-    private int id = 1; //id starts from 1
+    private int id; //id starts from 1 in repo
     private String brand;
     private int power;
     private Year year;
