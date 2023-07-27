@@ -1,0 +1,60 @@
+GET localhost:8080/StudentServletsNoDB/students?id=2
+
+###
+GET localhost:8080/StudentServletsNoDB/students?id=-1
+
+###
+GET localhost:8080/StudentServletsNoDB/students?id=hi
+
+###
+GET localhost:8080/StudentServletsNoDB/students
+
+###
+POST localhost:8080/StudentServletsNoDB/students?name="fourth"&age=10&num=10&salary=100
+
+###
+POST localhost:8080/StudentServletsNoDB/students?name="second"&age=10&num=10
+###
+POST localhost:8080/StudentServletsNoDB/students?name="second"&age=10&num=l
+
+###
+POST localhost:8080/StudentServletsNoDB/students
+content-type:application/json
+
+{
+  "id": 1,
+  "name": "fourth",
+  "age": 20,
+  "num": 1,
+  "salary": 1
+}
+
+###
+DELETE localhost:8080/StudentServletsNoDB/students
+
+###
+DELETE localhost:8080/StudentServletsNoDB/students?id=0
+
+###
+DELETE localhost:8080/StudentServletsNoDB/students?id=-1
+
+###
+DELETE localhost:8080/StudentServletsNoDB/students?id=4
+
+###
+DELETE localhost:8080/StudentServletsNoDB/students?id=hey
+
+###
+PUT localhost:8080/StudentServletsNoDB/students?id=4&name=replaced&salary=2000
+
+###
+PUT localhost:8080/StudentServletsNoDB/students?id=4&name=replaced&salary=2000&age=90&num=90
+
+###
+PUT localhost:8080/StudentServletsNoDB/students?id=4
+
+###
+PUT localhost:8080/StudentServletsNoDB/students?id=4&salary=2000l
+
+###
+PUT localhost:8080/StudentServletsNoDB/students?id=-1&salary=2000l
