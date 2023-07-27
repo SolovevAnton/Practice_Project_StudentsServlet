@@ -18,7 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Collection;
 
-@WebServlet("/car")
+@WebServlet("/cars")
 public class CarServlet extends HttpServlet {
     private Repository<Car> repo;
     private ResponseResult<Car> responseResult;
