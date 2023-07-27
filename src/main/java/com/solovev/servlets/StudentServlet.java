@@ -81,7 +81,8 @@ public class StudentServlet extends HttpServlet {
     }
 
     /**
-     * Updates student in the repo based on its id
+     * Updates student in the repo based on its id;
+     * If it has json object all fields will be ignored
      *
      * @param req  request must contain all filds with id
      * @param resp response will contain REPLACED object

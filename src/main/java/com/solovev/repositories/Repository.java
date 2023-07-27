@@ -15,4 +15,10 @@ public interface Repository<T> {
      * @return max ID of this repo,
      */
     int lastId();
+
+    /**
+     * Clears the repository
+     * @return collection that was in this repo
+     */
+    Collection<T> clear();
 }

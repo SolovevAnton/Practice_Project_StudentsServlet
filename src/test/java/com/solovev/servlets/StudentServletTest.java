@@ -225,7 +225,6 @@ public class StudentServletTest {
             PrintWriter writer = new PrintWriter(stringWriter);
             when(response.getWriter()).thenReturn(writer);
         }
-
         @Test
         void doPutNotFoundJson() throws IOException, ServletException {
             Student studentToAdd = new Student(-1, "added", 20, new Random().nextLong(), 1000);

@@ -97,7 +97,7 @@ class CarRepositoryTest {
     @Test
     void gettingFromSource() throws IOException {
         Repository<Car> repo = new CarRepository(Path.of("src/test/resources/testCarData.json"));
-        assertEquals(new Car(), repo.takeData(0));
+        assertEquals(new Car(1,"Audi",1,Year.of(2000),1), repo.takeData(1));
     }
 
     private AbstractRepository<Car> carRepo;
