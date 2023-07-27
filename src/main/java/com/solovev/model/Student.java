@@ -3,7 +3,7 @@ package com.solovev.model;
 import java.util.Objects;
 
 public class Student implements IdHolder {
-    private int id; //id starts from 1 in repo
+    private int id; ////id starts from 1 in repo so when empty is added it is not NULL!
     private String name;
     private int age;
     private long num;

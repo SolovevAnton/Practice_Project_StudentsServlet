@@ -1,14 +1,13 @@
 package com.solovev.repositories;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.solovev.model.IdHolder;
-import com.solovev.model.Student;
-import com.solovev.util.Constants;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -20,7 +19,7 @@ import java.util.*;
  */
 public abstract class AbstractRepository<T extends IdHolder> implements Repository<T> {
     private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
-    private Set<T> values = new HashSet<>();
+    private final Set<T> values = new HashSet<>();
     private File fileToStoreData;
 
     public AbstractRepository(Path path) throws IOException {
@@ -143,6 +142,13 @@ public abstract class AbstractRepository<T extends IdHolder> implements Reposito
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    @Override
+    public Collection<T> clear() {
+        Collection<T> oldData = takeData();
+        values.clear();
+        return oldData;
     }
 
     @Override
