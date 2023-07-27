@@ -115,7 +115,7 @@ public class StudentServlet extends HttpServlet {
         resp.setCharacterEncoding("utf-8");
         resp.setContentType("application/json;charset=utf-8");
 
-        //if successfully deleted returns true, false otherwise
+        //if successfully deleted returns deleted value, throws otherwise
         ResponseResult<Student> responseResult = new ResponseResult<>();
         String idString = req.getParameter("id");
 

@@ -35,12 +35,13 @@ public class CarServlet extends HttpServlet {
         repo = new CarRepository();
         responseResult = new ResponseResult<>();
     }
+
     /**
      * Creates car based on given parameters of the request, if they are presented
      *
-     * @param req     to take param from
+     * @param req to take param from
      * @return modified student
-     * @throws NumberFormatException if one of the parsed number parameters cannot be parsed
+     * @throws NumberFormatException                   if one of the parsed number parameters cannot be parsed
      * @throws java.time.format.DateTimeParseException if year will not be parsed correctly
      */
     private Car carCreator(HttpServletRequest req) throws NumberFormatException {
@@ -59,16 +60,17 @@ public class CarServlet extends HttpServlet {
         }
         return car;
     }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         config(req, resp);
-
+//returns car or all if id null, else throws
         String stringId = req.getParameter("id");
         if (stringId != null) {
             try {
                 int id = Integer.parseInt(stringId);
                 Car carToReturn = repo.takeData(id);
-                if(carToReturn != null){
+                if (carToReturn != null) {
                     responseResult.setData(carToReturn);
                 } else {
                     responseResult.setMessage(notFoundIdMessage);
@@ -86,18 +88,63 @@ public class CarServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        config(req,resp);
-
+        config(req, resp);
+        //returns posted car
         try {
             Car carToAdd = carCreator(req);
-            if(repo.add(carToAdd)){
+            if (repo.add(carToAdd)) {
                 responseResult.setData(carToAdd);
             } else {
                 responseResult.setMessage("This object already exists in database");
             }
-        } catch (NumberFormatException | DateTimeParseException e){
+        } catch (NumberFormatException | DateTimeParseException e) {
             responseResult.setMessage(e.toString());
         }
         resp.getWriter().write(responseResult.jsonToString());
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        config(req, resp);
+        String stringId = req.getParameter("id");
+        //returns deleted car or throws
+        if (stringId != null) {
+            try {
+                int id = Integer.parseInt(stringId);
+                Car carDeleted = repo.delete(id);
+                if (carDeleted != null) {
+                    responseResult.setData(carDeleted);
+                } else {
+                    responseResult.setMessage(notFoundIdMessage);
+                }
+            } catch (NumberFormatException e) {
+                responseResult.setMessage(e.toString());
+            }
+            resp.getWriter().write(responseResult.jsonToString());
+        }
+    }
+
+    @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        config(req, resp);
+        //returns replaced car or error msg
+        String stringId = req.getParameter("id");
+        if (stringId != null) {
+            try {
+                Car carReplacement = carCreator(req);
+                int id = Integer.parseInt(stringId);
+                Car carReplaced = repo.takeData(id);
+                carReplacement.setId(id);
+
+                if (repo.replace(carReplacement)) {
+                    responseResult.setData(carReplaced);
+                } else {
+                    responseResult.setMessage(notFoundIdMessage);
+                }
+            } catch (NumberFormatException | DateTimeParseException e) {
+                responseResult.setMessage(e.toString());
+            }
+            resp.getWriter().write(responseResult.jsonToString());
+        }
     }
 }
