@@ -155,7 +155,7 @@ public class CarServlet extends HttpServlet {
      * @throws IOException if IO exc occurs
      */
     @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp)  throws IOException {
         config(req, resp);
         //returns replaced car or error msg
         String stringId = req.getParameter("id");
