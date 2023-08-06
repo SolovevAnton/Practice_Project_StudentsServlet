@@ -18,7 +18,6 @@ import java.util.Collection;
 public class StudentServlet extends HttpServlet {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final String messageNoId = "Please provide object ID";
-
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         req.setCharacterEncoding("utf-8");
