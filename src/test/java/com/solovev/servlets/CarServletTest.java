@@ -142,7 +142,7 @@ class CarServletTest {
         private static final BiConsumer<HttpServletRequest, HttpServletResponse> doPut = (req, resp) -> {
             try {
                 servlet.doPut(req, resp);
-            } catch (IOException | ServletException e) {
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         };
