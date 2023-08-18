@@ -36,9 +36,6 @@ class ResponseResultTest {
         result.setData(new Student());
         assertEquals(new Student(),result.getData());
 
-        Repository<Student> repo = new StudentRepository(Path.of("src/test/resources/testStudentsData.json"));
-        result.setData(repo.takeData(1));
-        assertEquals(new Student(1, "first", 20, 1, 1),result.getData());
 
     }
     @ParameterizedTest

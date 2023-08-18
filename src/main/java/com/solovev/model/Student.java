@@ -7,12 +7,12 @@ public class Student implements IdHolder {
     private String name;
     private int age;
     private long num;
-    private int salary;
+    private double salary;
 
     public Student() {
     }
 
-    public Student(int id, String name, int age, long num, int salary) {
+    public Student(int id, String name, int age, long num, double salary) {
         this.id = id;
         this.name = name;
         this.age = age;
@@ -52,11 +52,11 @@ public class Student implements IdHolder {
         this.num = num;
     }
 
-    public int getSalary() {
+    public double getSalary() {
         return salary;
     }
 
-    public void setSalary(int salary) {
+    public void setSalary(double salary) {
         this.salary = salary;
     }
 

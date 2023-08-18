@@ -8,7 +8,6 @@ public interface Repository<T> {
     Collection<T> takeData();
     T takeData(int elemId);
     boolean replace(T newElem);
-    void save();
     int size();
     /**
      * Finds max id for collection in this repo

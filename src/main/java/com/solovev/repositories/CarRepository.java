@@ -1,22 +1,59 @@
 package com.solovev.repositories;
 
-import com.solovev.model.Car;
 import com.solovev.util.Constants;
 
-import java.io.IOException;
-import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.util.Collection;
 
-public class CarRepository extends AbstractRepository<Car> {
-    public CarRepository() throws IOException {
-        this(Constants.CAR_FILE);
+public class CarRepository<T> implements Repository<T> {
+    private Connection connection;
+
+    public CarRepository() {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            this.connection = DriverManager.getConnection(Constants.DB_URL, Constants.USERNAME, Constants.PASSWORD);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
-
-    public CarRepository(Path path) throws IOException {
-        super(path);
+    @Override
+    public boolean add(T elem) {
+        return false;
     }
 
     @Override
-    public Class<Car> getType() {
-        return Car.class;
+    public T delete(int elemId) {
+        return null;
+    }
+
+    @Override
+    public Collection<T> takeData() {
+        return null;
+    }
+
+    @Override
+    public T takeData(int elemId) {
+        return null;
+    }
+
+    @Override
+    public boolean replace(T newElem) {
+        return false;
+    }
+
+    @Override
+    public int size() {
+        return 0;
+    }
+
+    @Override
+    public int lastId() {
+        return 0;
+    }
+
+    @Override
+    public Collection<T> clear() {
+        return null;
     }
 }

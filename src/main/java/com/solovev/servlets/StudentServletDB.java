@@ -2,9 +2,7 @@ package com.solovev.servlets;
 
 import com.solovev.dto.ResponseResult;
 import com.solovev.model.Student;
-import com.solovev.repositories.Repository;
 import com.solovev.repositories.StudentRepository;
-import com.solovev.repositories.StudentRepositoryDB;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -23,7 +21,7 @@ public class StudentServletDB extends HttpServlet {
         resp.setContentType("application/json;charset=utf-8");
 
         String idString = req.getParameter("id");
-        try (StudentRepositoryDB repo = new StudentRepositoryDB()) {
+        try (StudentRepository repo = new StudentRepository()) {
             if (idString != null) {
                 ResponseResult<Student> result = new ResponseResult<>();
                 try {

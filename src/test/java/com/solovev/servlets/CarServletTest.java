@@ -142,7 +142,7 @@ class CarServletTest {
         private static final BiConsumer<HttpServletRequest, HttpServletResponse> doPut = (req, resp) -> {
             try {
                 servlet.doPut(req, resp);
-            } catch (IOException | ServletException e) {
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         };
@@ -414,11 +414,8 @@ class CarServletTest {
     private final Collection<Car> initialRepo; //to check if something has happened to initial repo
 
     {
-        try {
             initialRepo = new CarRepository().takeData();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     @BeforeEach
