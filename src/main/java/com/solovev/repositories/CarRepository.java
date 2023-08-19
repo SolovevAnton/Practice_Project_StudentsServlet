@@ -53,7 +53,7 @@ public class CarRepository<T> implements Repository<T> {
     }
 
     @Override
-    public Collection<T> clear() {
-        return null;
+    public void close() throws Exception {
+
     }
 }

@@ -2,7 +2,7 @@ package com.solovev.repositories;
 
 import java.util.Collection;
 
-public interface Repository<T> {
+public interface Repository<T> extends AutoCloseable{
     boolean add(T elem);
     T delete(int elemId);
     Collection<T> takeData();
@@ -15,9 +15,4 @@ public interface Repository<T> {
      */
     int lastId();
 
-    /**
-     * Clears the repository
-     * @return collection that was in this repo
-     */
-    Collection<T> clear();
 }

@@ -97,7 +97,7 @@ class StudentRepositoryTest {
                     assertFalse(findStatement.executeQuery().next());
                     replaceSet = takeStudentStatement.executeQuery();
                     replaceSet.next();
-                    assertEquals(toBeReplaced,studentFactory(replaceSet));
+                    assertEquals(toBeReplaced, studentFactory(replaceSet));
 
                     //with changed id should be replaced
                     studentToReplaceWith.setId(toBeReplaced.getId());
@@ -106,27 +106,37 @@ class StudentRepositoryTest {
                     assertTrue(findStatement.executeQuery().next());
                     replaceSet = takeStudentStatement.executeQuery();
                     replaceSet.next();
-                    assertEquals(studentToReplaceWith,studentFactory(replaceSet));
+                    assertEquals(studentToReplaceWith, studentFactory(replaceSet));
 
                     //replace again to original one
                     assertTrue(repo.replace(toBeReplaced));
                     assertFalse(findStatement.executeQuery().next());
                     replaceSet = takeStudentStatement.executeQuery();
                     replaceSet.next();
-                    assertEquals(toBeReplaced,studentFactory(replaceSet));
+                    assertEquals(toBeReplaced, studentFactory(replaceSet));
                 }
             }
         }
     }
 
     @Test
-    void size() {
-        fail();
+    void size() throws Exception {
+        try (Repository<Student> repo = new StudentRepository()) {
+            assertEquals(studentsInDb.size(), repo.size());
+        }
     }
 
     @Test
-    void lastId() {
-        fail();
+    void lastId() throws Exception {
+        try (Repository<Student> repo = new StudentRepository()) {
+            int maxId = studentsInDb
+                    .stream()
+                    .mapToInt(Student::getId)
+                    .max()
+                    .orElse(0);
+
+            assertEquals(maxId, repo.lastId());
+        }
     }
 
     @BeforeEach

@@ -9,6 +9,7 @@ import java.util.Collection;
 
 public class StudentRepository implements Repository<Student>, AutoCloseable {
     private Connection connection;
+
     //todo how to test without real db??
     public StudentRepository() {
         try {
@@ -18,6 +19,7 @@ public class StudentRepository implements Repository<Student>, AutoCloseable {
             e.printStackTrace();
         }
     }
+
     /**
      * Builds student based on this result set
      *
@@ -33,7 +35,23 @@ public class StudentRepository implements Repository<Student>, AutoCloseable {
         student.setSalary(resultSet.getDouble(5));
         return student;
     }
-    
+
+    /**
+     * Method helps to find last id in this database
+     * @param query
+     * @return
+     */
+    private int gettingOneLineIntFromDB(String query) {
+        int maxId = 0;
+        try (PreparedStatement preparedStatement = this.connection.prepareStatement(query)) {
+            ResultSet result = preparedStatement.executeQuery();
+            result.next();
+            maxId = result.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return maxId;
+    }
     @Override
     public boolean add(Student student) { //todo how to autodecrement?
         String sql = "insert into students(fio,age,num,salary) values (?,?,?,?)";
@@ -81,14 +99,13 @@ public class StudentRepository implements Repository<Student>, AutoCloseable {
         try (PreparedStatement preparedStatement = this.connection.prepareStatement(sql)) {
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-             students.add(studentFactory(resultSet));
+                students.add(studentFactory(resultSet));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return students;
     }
-
 
 
     @Override
@@ -125,18 +142,16 @@ public class StudentRepository implements Repository<Student>, AutoCloseable {
 
     @Override
     public int size() {
-        return 0;
+        String query = "SELECT COUNT(id) FROM students";
+        return gettingOneLineIntFromDB(query);
     }
 
     @Override
     public int lastId() {
-        return 0;
+        String query = "SELECT MAX(id) FROM students;";
+        return gettingOneLineIntFromDB(query);
     }
 
-    @Override
-    public Collection<Student> clear() {
-        return null;
-    }
 
     @Override
     public void close() {
