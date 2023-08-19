@@ -9,7 +9,7 @@ import java.util.Collection;
 
 public class StudentRepository implements Repository<Student>, AutoCloseable {
     private Connection connection;
-
+    //todo how to test without real db??
     public StudentRepository() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -18,9 +18,24 @@ public class StudentRepository implements Repository<Student>, AutoCloseable {
             e.printStackTrace();
         }
     }
-
+    /**
+     * Builds student based on this result set
+     *
+     * @param resultSet to create student from
+     * @return created student
+     */
+    private static Student studentFactory(ResultSet resultSet) throws SQLException {
+        Student student = new Student();
+        student.setId(resultSet.getInt(1));
+        student.setName(resultSet.getString(2));
+        student.setAge(resultSet.getInt(3));
+        student.setNum(resultSet.getInt(4));
+        student.setSalary(resultSet.getDouble(5));
+        return student;
+    }
+    
     @Override
-    public boolean add(Student student) {
+    public boolean add(Student student) { //todo how to autodecrement?
         String sql = "insert into students(fio,age,num,salary) values (?,?,?,?)";
         try (PreparedStatement preparedStatement = this.connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, student.getName());
@@ -51,6 +66,7 @@ public class StudentRepository implements Repository<Student>, AutoCloseable {
             String sql = "delete from students where students.id=?";
             try (PreparedStatement preparedStatement = this.connection.prepareStatement(sql)) {
                 preparedStatement.setInt(1, elemId);
+                preparedStatement.executeUpdate();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -65,20 +81,15 @@ public class StudentRepository implements Repository<Student>, AutoCloseable {
         try (PreparedStatement preparedStatement = this.connection.prepareStatement(sql)) {
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                Student student = new Student();
-                student.setId(resultSet.getInt(1));
-                student.setName(resultSet.getString(2));
-                student.setAge(resultSet.getInt(3));
-                student.setNum(resultSet.getInt(4));
-                student.setSalary(resultSet.getDouble(5));
-
-                students.add(student);
+             students.add(studentFactory(resultSet));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return students;
     }
+
+
 
     @Override
     public Student takeData(int elemId) {
@@ -89,14 +100,7 @@ public class StudentRepository implements Repository<Student>, AutoCloseable {
             if (!resultSet.next()) {
                 return null;
             }
-            Student student = new Student();
-            student.setId(resultSet.getInt(1));
-            student.setName(resultSet.getString(2));
-            student.setAge(resultSet.getInt(3));
-            student.setNum(resultSet.getInt(4));
-            student.setSalary(resultSet.getInt(5));
-
-            return student;
+            return studentFactory(resultSet);
         } catch (SQLException e) {
             e.printStackTrace();
         }
