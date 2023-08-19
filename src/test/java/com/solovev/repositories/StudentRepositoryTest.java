@@ -65,7 +65,7 @@ class StudentRepositoryTest {
                 Student deletedStudent = repo.delete(studentInDb.getId());
                 found = preparedStatement.executeQuery();
 
-                assertEquals(studentToAdd,deletedStudent);
+                assertEquals(studentToAdd, deletedStudent);
                 assertFalse(found.next());
             }
         }
@@ -74,18 +74,49 @@ class StudentRepositoryTest {
     @Test
     void replace() throws ClassNotFoundException, SQLException {
         Class.forName("com.mysql.cj.jdbc.Driver");
-        String findStas = "SELECT * FROM students WHERE fio='Stas'";
+        String sqlFindStas = "SELECT * FROM students WHERE fio='Stas'";
+        String sqlStudentToReplace = "SELECT * FROM students WHERE id = 1";
         Student studentToReplaceWith = new Student(-1, "Stas", 25, 104, 1600.00);
 
-        try (PreparedStatement preparedStatement =
+        try (PreparedStatement findStatement =
                      DriverManager
                              .getConnection(Constants.DB_URL, Constants.USERNAME, Constants.PASSWORD)
-                             .prepareStatement(findStas)) {
+                             .prepareStatement(sqlFindStas)) {
             //checks that base does not contain Stas
-            Assumptions.assumeFalse(preparedStatement.executeQuery().next());
-        }
+            Assumptions.assumeFalse(findStatement.executeQuery().next());
+            try (PreparedStatement takeStudentStatement =
+                         DriverManager
+                                 .getConnection(Constants.DB_URL, Constants.USERNAME, Constants.PASSWORD)
+                                 .prepareStatement(sqlStudentToReplace)) {
+                ResultSet replaceSet = takeStudentStatement.executeQuery();
+                replaceSet.next();
+                Student toBeReplaced = studentFactory(replaceSet);
+                try (StudentRepository repo = new StudentRepository()) {
+                    //with wrong id should not be replaced
+                    assertFalse(repo.replace(studentToReplaceWith));
+                    assertFalse(findStatement.executeQuery().next());
+                    replaceSet = takeStudentStatement.executeQuery();
+                    replaceSet.next();
+                    assertEquals(toBeReplaced,studentFactory(replaceSet));
 
-        fail();
+                    //with changed id should be replaced
+                    studentToReplaceWith.setId(toBeReplaced.getId());
+
+                    assertTrue(repo.replace(studentToReplaceWith));
+                    assertTrue(findStatement.executeQuery().next());
+                    replaceSet = takeStudentStatement.executeQuery();
+                    replaceSet.next();
+                    assertEquals(studentToReplaceWith,studentFactory(replaceSet));
+
+                    //replace again to original one
+                    assertTrue(repo.replace(toBeReplaced));
+                    assertFalse(findStatement.executeQuery().next());
+                    replaceSet = takeStudentStatement.executeQuery();
+                    replaceSet.next();
+                    assertEquals(toBeReplaced,studentFactory(replaceSet));
+                }
+            }
+        }
     }
 
     @Test
@@ -97,6 +128,7 @@ class StudentRepositoryTest {
     void lastId() {
         fail();
     }
+
     @BeforeEach
     @AfterEach
     /**
