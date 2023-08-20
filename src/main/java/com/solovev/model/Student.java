@@ -6,13 +6,13 @@ public class Student implements IdHolder {
     private int id; ////id starts from 1 in repo so when empty is added it is not NULL!
     private String name;
     private int age;
-    private long num;
+    private int num;
     private double salary;
 
     public Student() {
     }
 
-    public Student(int id, String name, int age, long num, double salary) {
+    public Student(int id, String name, int age, int num, double salary) {
         this.id = id;
         this.name = name;
         this.age = age;
@@ -44,11 +44,11 @@ public class Student implements IdHolder {
         this.age = age;
     }
 
-    public long getNum() {
+    public int getNum() {
         return num;
     }
 
-    public void setNum(long num) {
+    public void setNum(int num) {
         this.num = num;
     }
 

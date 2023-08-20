@@ -12,12 +12,15 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Collection;
 
 @WebServlet("/students")
 public class StudentServlet extends HttpServlet {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final String messageNoId = "Please provide object ID";
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         req.setCharacterEncoding("utf-8");
@@ -61,6 +64,7 @@ public class StudentServlet extends HttpServlet {
         req.setCharacterEncoding("utf-8");
         resp.setCharacterEncoding("utf-8");
         resp.setContentType("application/json;charset=utf-8");
+
         Repository<Student> repo = new StudentRepository();
         ResponseResult<Student> responseResult = new ResponseResult<>();
         try {
@@ -69,10 +73,8 @@ public class StudentServlet extends HttpServlet {
                     : studentCreator(req);
             if (repo.add(studentToAdd)) {
                 responseResult.setData(studentToAdd);
-            } else {
-                responseResult.setMessage("This object already exists in database");
             }
-        } catch (NumberFormatException | JsonParseException e) {
+        } catch (NumberFormatException | JsonParseException | SQLException e) {
             responseResult.setMessage("Error: " + e);
         }
         resp.getWriter().write(responseResult.jsonToString());
@@ -159,7 +161,7 @@ public class StudentServlet extends HttpServlet {
 
     /**
      * Creates student based on given parameters of the request, if they are presented
-     *
+     * Note: Name, num  and salary cannot be nulls!
      * @param req to take param from
      * @return modified student
      * @throws NumberFormatException if one of the parsed number parameters cannot be parsed
@@ -174,10 +176,10 @@ public class StudentServlet extends HttpServlet {
             student.setAge(Integer.parseInt(req.getParameter("age")));
         }
         if (req.getParameter("num") != null) {
-            student.setNum(Long.parseLong(req.getParameter("num")));
+            student.setNum(Integer.parseInt(req.getParameter("num")));
         }
         if (req.getParameter("salary") != null) {
-            student.setSalary(Integer.parseInt(req.getParameter("salary")));
+            student.setSalary(Double.parseDouble(req.getParameter("salary")));
         }
         return student;
     }

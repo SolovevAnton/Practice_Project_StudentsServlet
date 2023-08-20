@@ -18,12 +18,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,59 +32,8 @@ public class StudentServletTest {
     @Nested
     class doPostTests {
         @Test
-        void doPostExists() throws IOException{
-            StudentRepository repo = new StudentRepository();
-            Assumptions.assumeTrue(repo.size() > 0);
-
-            Student existingStudent = repo.takeData().stream().findAny().get();
-
-            when(request.getParameter("name")).thenReturn(existingStudent.getName());
-            when(request.getParameter("age")).thenReturn(String.valueOf(existingStudent.getAge()));
-            when(request.getParameter("num")).thenReturn(String.valueOf(existingStudent.getNum()));
-            when(request.getParameter("salary")).thenReturn(String.valueOf(existingStudent.getSalary()));
-
-            StringWriter stringWriter = new StringWriter();
-            PrintWriter writer = new PrintWriter(stringWriter);
-            when(response.getWriter()).thenReturn(writer);
-
-            StudentServlet servlet = new StudentServlet();
-            servlet.doPost(request, response);
-            writer.flush();
-
-            assertEquals("{\"message\":\"This object already exists in database\"}", stringWriter.toString().trim());
-        }
-        @Test
-        void doPostExistsJson() throws IOException{
-            StudentRepository repo = new StudentRepository();
-            Assumptions.assumeTrue(repo.size() > 0);
-
-            Student existingStudent = repo.takeData().stream().findAny().get();
-
-            ObjectMapper objectMapper = new ObjectMapper();
-            // Set the Content-Type header to application/json
-            when(request.getHeader("Content-Type")).thenReturn("application/json");
-
-            // Create a BufferedReader with the JSON content
-            BufferedReader reader = new BufferedReader(new StringReader(objectMapper.writeValueAsString(existingStudent)));
-
-            // Set up the getReader() method of the HttpServletRequest to return the BufferedReader
-            when(request.getReader()).thenReturn(reader);
-
-
-            StringWriter stringWriter = new StringWriter();
-            PrintWriter writer = new PrintWriter(stringWriter);
-            when(response.getWriter()).thenReturn(writer);
-
-            StudentServlet servlet = new StudentServlet();
-            servlet.doPost(request, response);
-            writer.flush();
-
-            assertEquals("{\"message\":\"This object already exists in database\"}", stringWriter.toString().trim());
-        }
-
-        @Test
         void doPostNotInteger() throws IOException {
-            when(request.getParameter("name")).thenReturn(null);
+            when(request.getParameter("name")).thenReturn("notNull");
             when(request.getParameter("age")).thenReturn(null);
             when(request.getParameter("num")).thenReturn("1l");
 
@@ -121,10 +70,43 @@ public class StudentServletTest {
             assertEquals("{\"message\":\"Error: com.fasterxml.jackson.core.JsonParseException: Unexpected character ('h' (code 104)): was expecting comma to separate Object entries\\n at [Source: (BufferedReader); line: 1, column: 29]\"}"
                     , stringWriter.toString().trim());
         }
+        @Test
+        void doPostConstrainViolationNameNull() throws IOException {
+            when(request.getParameter("name")).thenReturn(null);
+            when(request.getParameter("age")).thenReturn(null);
+            when(request.getParameter("num")).thenReturn("20");
+
+            StringWriter stringWriter = new StringWriter();
+            PrintWriter writer = new PrintWriter(stringWriter);
+            when(response.getWriter()).thenReturn(writer);
+
+            StudentServlet servlet = new StudentServlet();
+            servlet.doPost(request, response);
+            writer.flush();
+
+            assertEquals("{\"message\":\"Error: java.sql.SQLIntegrityConstraintViolationException: Column 'fio' cannot be null\"}", stringWriter.toString().trim());
+        }        @Test
+        void doPostConstrainViolationNotUniqueNum() throws IOException {
+            when(request.getParameter("name")).thenReturn("num");
+            when(request.getParameter("age")).thenReturn(null);
+            when(request.getParameter("num")).thenReturn("100");
+
+            StringWriter stringWriter = new StringWriter();
+            PrintWriter writer = new PrintWriter(stringWriter);
+            when(response.getWriter()).thenReturn(writer);
+
+            StudentServlet servlet = new StudentServlet();
+            servlet.doPost(request, response);
+            writer.flush();
+
+            assertEquals("{\"message\":\"Error: java.sql.SQLIntegrityConstraintViolationException: Duplicate entry '100' for key 'students.num'\"}", stringWriter.toString().trim());
+        }
+
 
         @Test
         void doPostMainScenario() throws IOException{
             Assumptions.assumeFalse(new StudentRepository().takeData().contains(studentToAdd));
+            int initialLastId = new StudentRepository().lastId();
 
             when(request.getParameter("name")).thenReturn(studentToAdd.getName());
             when(request.getParameter("age")).thenReturn(String.valueOf(studentToAdd.getAge()));
@@ -139,6 +121,9 @@ public class StudentServletTest {
             servlet.doPost(request, response);
             writer.flush();
 
+            //test if even added, if it is then proceed to see what was added
+            assertNotEquals(initialLastId, new StudentRepository().lastId());
+
             studentToAdd.setId(new StudentRepository().lastId()); //since added student is the new object
 
             ResponseResult<Student> expectedResp = new ResponseResult<>(studentToAdd);
@@ -149,6 +134,7 @@ public class StudentServletTest {
         void doPostJsonObjectAdding() throws IOException{
             Assumptions.assumeFalse(new StudentRepository().takeData().contains(studentToAdd));
             ObjectMapper objectMapper = new ObjectMapper();
+            int initialLastId = new StudentRepository().lastId();
             // Set the Content-Type header to application/json
             when(request.getHeader("Content-Type")).thenReturn("application/json");
 
@@ -165,6 +151,9 @@ public class StudentServletTest {
             StudentServlet servlet = new StudentServlet();
             servlet.doPost(request, response);
             writer.flush();
+
+            //test if even added, if it is then proceed to see what was added
+            assertNotEquals(initialLastId, new StudentRepository().lastId());
 
             studentToAdd.setId(new StudentRepository().lastId()); //since added student is the new object
 
@@ -207,7 +196,7 @@ public class StudentServletTest {
             assertFalse(new StudentRepository().takeData().contains(studentToIgnore));
         }
 
-        private final Student studentToAdd = new Student(-1, "added", 20, new Random().nextLong(), 1000);
+        private final Student studentToAdd = new Student(-1, "added", 20, new Random().nextInt(), 1000);
 
         @AfterEach
         void deletingAddedStudent() throws IOException {
@@ -227,7 +216,7 @@ public class StudentServletTest {
         }
         @Test
         void doPutNotFoundJson() throws IOException, ServletException {
-            Student studentToAdd = new Student(-1, "added", 20, new Random().nextLong(), 1000);
+            Student studentToAdd = new Student(-1, "added", 20, new Random().nextInt(), 1000);
 
             ObjectMapper objectMapper = new ObjectMapper();
             // Set the Content-Type header to application/json
@@ -288,7 +277,6 @@ public class StudentServletTest {
             when(request.getHeader("Content-Type")).thenReturn("application/json");
             String corruptedObject = "{\"id\":1,\"name\":null,\"age\":2h,\"num\":3,\"salary\":3}";
 
-            // Create a BufferedReader with the JSON content
             BufferedReader reader = new BufferedReader(new StringReader(corruptedObject));
 
             // Set up the getReader() method of the HttpServletRequest to return the BufferedReader
@@ -302,13 +290,13 @@ public class StudentServletTest {
                     , stringWriter.toString().trim());
         }
         @Test
-        public void doPutIgnoreParameters() throws IOException, ServletException {
+        public void doPutIgnoreParameters() throws IOException, ServletException, SQLException {
             Student studentToIgnore = new Student(-1,"toIgnore",5,10,10);
-            Student studentToAdd = new Student(-1, "added", 20, new Random().nextLong(), 1000);
+            Student studentToAdd = new Student(-1, "added", 20, new Random().nextInt(), 1000);
 
             Repository<Student> realRepo = new StudentRepository();
             Student studentToReplace = new Student();
-            studentToReplace.setNum(new Random().nextLong()); // in very rare cases this test might not run due to this student already is presented in real repo
+            studentToReplace.setNum(new Random().nextInt()); // in very rare cases this test might not run due to this student already is presented in real repo
             Assumptions.assumeTrue(realRepo.add(studentToReplace));
             idDelete = studentToReplace.getId();
             assertFalse(new StudentRepository().takeData().contains(studentToIgnore)); //Test will Fail if car already exits, so the AfterEach cleaner will be executed!
@@ -350,13 +338,13 @@ public class StudentServletTest {
         }
         @ParameterizedTest
         @MethodSource("studentProvider")
-        void doPutMainScenario(Student studentToAdd) throws IOException, ServletException {
+        void doPutMainScenario(Student studentToAdd) throws IOException, ServletException, SQLException {
             Repository<Student> realRepo = new StudentRepository();
             Student studentToReplace = new Student();
-            studentToReplace.setNum(new Random().nextLong()); // in very rare cases this test might not run due to this student already is presented in real repo
+            studentToReplace.setNum(new Random().nextInt()); // in very rare cases this test might not run due to this student already is presented in real repo
             Assumptions.assumeTrue(realRepo.add(studentToReplace));
             idDelete = studentToReplace.getId();
-            assertFalse(new StudentRepository().takeData().contains(studentToAdd)); //Test will Fail if car already exits, so the AfterEach cleaner will be executed!
+            assertFalse(new StudentRepository().takeData().contains(studentToAdd)); //Test will Fail if student already exits, so the AfterEach cleaner will be executed!
 
 
 
@@ -381,13 +369,13 @@ public class StudentServletTest {
         }
         @ParameterizedTest
         @MethodSource("studentProvider")
-        void doPutMainJson(Student studentToAdd) throws IOException, ServletException {
+        void doPutMainJson(Student studentToAdd) throws IOException, ServletException, SQLException {
             Repository<Student> realRepo = new StudentRepository();
             Student studentToReplace = new Student();
-            studentToReplace.setNum(new Random().nextLong()); // in very rare cases this test might not run due to this student already is presented in real repo
+            studentToReplace.setNum(new Random().nextInt()); // in very rare cases this test might not run due to this student already is presented in real repo
             Assumptions.assumeTrue(realRepo.add(studentToReplace));
             idDelete = studentToReplace.getId();
-            assertFalse(new StudentRepository().takeData().contains(studentToAdd)); //Test will Fail if car already exits, so the AfterEach cleaner will be executed!
+            assertFalse(new StudentRepository().takeData().contains(studentToAdd)); //Test will Fail if student already exits, so the AfterEach cleaner will be executed!
 
             studentToAdd.setId(idDelete); //since added student is the new object
 
@@ -431,9 +419,9 @@ public class StudentServletTest {
             Student nameAgeNum = new Student();
             nameAgeNum.setName("nameAgeNum");
             nameAgeNum.setAge(15);
-            nameAgeNum.setNum(rand.nextLong());
+            nameAgeNum.setNum(rand.nextInt());
 
-            Student full = new Student(-1, "Full", 20, rand.nextLong(), rand.nextInt());
+            Student full = new Student(-1, "Full", 20, rand.nextInt(), rand.nextInt());
 
             return List.of(emptyStudent, onlyAge,nameAge, onlyName, nameAgeNum, full);
         }
@@ -582,10 +570,10 @@ public class StudentServletTest {
         }
 
         @Test
-        void doDeleteMainScenario() throws IOException, ServletException {
+        void doDeleteMainScenario() throws IOException, SQLException {
             Repository<Student> realRepo = new StudentRepository();
             Student studentToTempAdd = new Student();
-            studentToTempAdd.setNum(new Random().nextLong()); // in very rare cases this test might fail due to this student already is presented in real repo
+            studentToTempAdd.setNum(new Random().nextInt()); // in very rare cases this test might fail due to this student already is presented in real repo
             Assumptions.assumeTrue(realRepo.add(studentToTempAdd));
 
             when(request.getParameter("id")).thenReturn(String.valueOf(studentToTempAdd.getId()));

@@ -1,9 +1,10 @@
 package com.solovev.repositories;
 
+import java.sql.SQLException;
 import java.util.Collection;
 
 public interface Repository<T> extends AutoCloseable{
-    boolean add(T elem);
+    boolean add (T elem) throws SQLException;
     T delete(int elemId);
     Collection<T> takeData();
     T takeData(int elemId);

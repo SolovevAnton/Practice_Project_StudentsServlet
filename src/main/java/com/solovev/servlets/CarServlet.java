@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.time.Year;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -115,9 +116,10 @@ public class CarServlet extends HttpServlet {
             } else {
                 responseResult.setMessage("This object already exists in database");
             }
-        } catch (NumberFormatException | DateTimeParseException | JsonParseException e) {
+        } catch (NumberFormatException | DateTimeParseException | JsonParseException | SQLException e) {
             responseResult.setMessage("Error: " + e);
         }
+
         resp.getWriter().write(responseResult.jsonToString());
     }
 
@@ -155,7 +157,7 @@ public class CarServlet extends HttpServlet {
      * @throws IOException if IO exc occurs
      */
     @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp)  throws IOException {
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         config(req, resp);
         //returns replaced car or error msg
         String stringId = req.getParameter("id");

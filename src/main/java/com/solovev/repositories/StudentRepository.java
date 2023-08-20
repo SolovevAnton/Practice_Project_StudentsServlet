@@ -38,6 +38,7 @@ public class StudentRepository implements Repository<Student>, AutoCloseable {
 
     /**
      * Method helps to execute cuery with ONE result of single int and return it
+     *
      * @param query to execute
      * @return int that got from DB or 0 if nothing
      */
@@ -52,13 +53,14 @@ public class StudentRepository implements Repository<Student>, AutoCloseable {
         }
         return maxId;
     }
+
     @Override
-    public boolean add(Student student) { //todo how to autodecrement?
+    public boolean add(Student student) throws SQLException { //todo how to autodecrement?
         String sql = "insert into students(fio,age,num,salary) values (?,?,?,?)";
         try (PreparedStatement preparedStatement = this.connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, student.getName());
             preparedStatement.setInt(2, student.getAge());
-            preparedStatement.setInt(3, (int) student.getNum()); // todo refactor student to int
+            preparedStatement.setInt(3, student.getNum());
             preparedStatement.setDouble(4, student.getSalary());
 
             int row = preparedStatement.executeUpdate();
@@ -71,10 +73,7 @@ public class StudentRepository implements Repository<Student>, AutoCloseable {
                     student.setId(generatedKeys.getInt(1));
             }
             return true;
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
-        return false;
     }
 
     @Override

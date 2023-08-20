@@ -18,6 +18,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.sql.SQLException;
 import java.time.Year;
 import java.util.Collection;
 import java.util.List;
@@ -255,7 +256,7 @@ class CarServletTest {
 
         @ParameterizedTest
         @MethodSource("someCarProvider")
-        public void doDelete(Car carToDelete) throws ServletException, IOException {
+        public void doDelete(Car carToDelete) throws ServletException, IOException, SQLException {
             Assumptions.assumeTrue(repo.add(carToDelete));
             idToDeleteFromRepo = carToDelete.getId(); //to be deleted even if test fails
 
@@ -336,7 +337,7 @@ class CarServletTest {
 
         @ParameterizedTest
         @MethodSource("someCarProvider")
-        public void doPutJson(Car carReplacement) throws ServletException, IOException {
+        public void doPutJson(Car carReplacement) throws ServletException, IOException, SQLException {
             Car carToBeReplaced = new Car();
             carToBeReplaced.setBrand("toBeReplaced");
             Assumptions.assumeTrue(repo.add(carToBeReplaced)); //test fails if this car alreadyExists
@@ -359,7 +360,7 @@ class CarServletTest {
 
         @ParameterizedTest
         @MethodSource("someCarProvider")
-        public void doPut(Car carReplacement) throws ServletException, IOException {
+        public void doPut(Car carReplacement) throws ServletException, IOException, SQLException {
             Car carToBeReplaced = new Car();
             carToBeReplaced.setBrand("toBeReplaced");
             Assumptions.assumeTrue(repo.add(carToBeReplaced)); //test fails if this car alreadyExists
@@ -380,7 +381,7 @@ class CarServletTest {
         }
 
         @Test
-        public void jsonFieldsIgnorePut() throws IOException, ServletException {
+        public void jsonFieldsIgnorePut() throws IOException, ServletException, SQLException {
             Car carToBeReplaced = new Car();
             carToBeReplaced.setBrand("toBeReplaced");
             Assumptions.assumeTrue(repo.add(carToBeReplaced)); //test fails if this car alreadyExists
