@@ -141,9 +141,9 @@ class StudentRepositoryTest {
 
     @BeforeEach
     @AfterEach
-    /**
+    /*
      * Method tests that database stays in its initial state after every test,
-     * and fails if its not, so it can be seen and recovered quickly
+     * and fails if it's not, so it can be seen and recovered quickly
      */
     void dbTest() throws ClassNotFoundException, SQLException {
         Class.forName("com.mysql.cj.jdbc.Driver");
@@ -184,7 +184,7 @@ class StudentRepositoryTest {
         return student;
     }
 
-    private Collection<Student> studentsInDb = List.of(
+    private final Collection<Student> studentsInDb = List.of(
             new Student(1, "Igor", 22, 100, 1200.00),
             new Student(2, "Ivan", 21, 101, 1300.00),
             new Student(3, "Ila", 23, 102, 1400.00),

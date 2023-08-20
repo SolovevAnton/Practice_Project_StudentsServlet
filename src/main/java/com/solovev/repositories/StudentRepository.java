@@ -37,9 +37,9 @@ public class StudentRepository implements Repository<Student>, AutoCloseable {
     }
 
     /**
-     * Method helps to find last id in this database
-     * @param query
-     * @return
+     * Method helps to execute cuery with ONE result of single int and return it
+     * @param query to execute
+     * @return int that got from DB or 0 if nothing
      */
     private int gettingOneLineIntFromDB(String query) {
         int maxId = 0;
