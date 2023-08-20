@@ -88,8 +88,8 @@ public class CarRepository implements Repository<Car> {
     public Car delete(int elemId) {
         Car deletedCar = takeData(elemId);
         String queryToDelete = "DELETE FROM auto WHERE auto.id=?";
-        try(PreparedStatement statement = connection.prepareStatement(queryToDelete)){
-            statement.setInt(1,elemId);
+        try (PreparedStatement statement = connection.prepareStatement(queryToDelete)) {
+            statement.setInt(1, elemId);
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -135,8 +135,17 @@ public class CarRepository implements Repository<Car> {
     }
 
     @Override
-    public boolean replace(Car newElem) {
-        return false;
+    public boolean replace(Car carToReplaceWith) {
+        String sql = "UPDATE auto SET auto.brand=?, auto.power=?, auto.year=?, auto.id_s=? where auto.id=?";
+        int updateExecuted = -1; // to show that update failed, if it has failed
+        try (PreparedStatement preparedStatement = this.connection.prepareStatement(sql)) {
+            prepareStatement(preparedStatement, carToReplaceWith);
+            preparedStatement.setInt(5, carToReplaceWith.getId());
+            updateExecuted = preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return updateExecuted > 0;
     }
 
     @Override

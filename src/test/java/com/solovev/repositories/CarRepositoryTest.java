@@ -57,8 +57,9 @@ class CarRepositoryTest {
             assertEquals(carsInDb.toArray(new Car[0])[idToCheck - 1], repo.takeData(idToCheck)); //-1 since index and id difference
         }
     }
+
     @Test
-    void takeDataNotFound(){
+    void takeDataNotFound() {
         try (CarRepository repo = new CarRepository()) {
             assertNull(repo.takeData(-1));
         }
@@ -67,7 +68,7 @@ class CarRepositoryTest {
     @Test
     void addAndDeleteTestNormal() throws ClassNotFoundException, SQLException {
         String findVolvoQuery = "SELECT * FROM auto WHERE brand = 'Volvo'";
-        Car carToAdd = new Car(-1,"Volvo", 200, Year.of(2009), 4);
+        Car carToAdd = new Car(-1, "Volvo", 200, Year.of(2009), 4);
 
         try (PreparedStatement preparedStatement =
                      connection
@@ -93,10 +94,53 @@ class CarRepositoryTest {
             }
         }
     }
+
     @Test
-    void deleteNotFound(){
+    void deleteNotFound() {
         try (CarRepository repo = new CarRepository()) {
             assertNull(repo.delete(-1));
+        }
+    }
+
+    @Test
+    void replaceTest() throws SQLException {
+        String findVolvoQuery = "SELECT * FROM auto WHERE brand = 'Volvo'";
+        String sqlCarToReplace = "SELECT * FROM auto WHERE id = 1";
+        Car carToReplaceWith = new Car(-1, "Volvo", 200, Year.of(2009), 4);
+
+        try (PreparedStatement findStatement = connection
+                .prepareStatement(findVolvoQuery)) {
+            //checks that base does not contain Volvo
+            Assumptions.assumeFalse(findStatement.executeQuery().next());
+            try (PreparedStatement takeCarStatement = connection.prepareStatement(sqlCarToReplace)) {
+                ResultSet replaceSet = takeCarStatement.executeQuery();
+                replaceSet.next();
+                Car toBeReplaced = carFactory(replaceSet);
+                try (CarRepository repo = new CarRepository()) {
+                    //with wrong id should not be replaced
+                    assertFalse(repo.replace(carToReplaceWith));
+                    assertFalse(findStatement.executeQuery().next());
+                    replaceSet = takeCarStatement.executeQuery();
+                    replaceSet.next();
+                    assertEquals(toBeReplaced, carFactory(replaceSet));
+
+                    //with changed id should be replaced
+                    carToReplaceWith.setId(toBeReplaced.getId());
+
+                    assertTrue(repo.replace(carToReplaceWith));
+                    assertTrue(findStatement.executeQuery().next());
+                    replaceSet = takeCarStatement.executeQuery();
+                    replaceSet.next();
+                    assertEquals(carToReplaceWith, carFactory(replaceSet));
+
+                    //replace again to original one
+                    assertTrue(repo.replace(toBeReplaced));
+                    assertFalse(findStatement.executeQuery().next());
+                    replaceSet = takeCarStatement.executeQuery();
+                    replaceSet.next();
+                    assertEquals(toBeReplaced, carFactory(replaceSet));
+                }
+            }
         }
     }
 
