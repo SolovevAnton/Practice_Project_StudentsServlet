@@ -16,8 +16,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * All tests for now in DB used real DB!!
@@ -58,6 +57,12 @@ class CarRepositoryTest {
             assertEquals(carsInDb.toArray(new Car[0])[idToCheck - 1], repo.takeData(idToCheck)); //-1 since index and id difference
         }
     }
+    @Test
+    void takeDataNotFound(){
+        try (CarRepository repo = new CarRepository()) {
+            assertNull(repo.takeData(-1));
+        }
+    }
 
     @Test
     void addAndDeleteTestNormal() throws ClassNotFoundException, SQLException {
@@ -86,6 +91,12 @@ class CarRepositoryTest {
                 assertEquals(carToAdd, deletedCar);
                 assertFalse(found.next());
             }
+        }
+    }
+    @Test
+    void deleteNotFound(){
+        try (CarRepository repo = new CarRepository()) {
+            assertNull(repo.delete(-1));
         }
     }
 

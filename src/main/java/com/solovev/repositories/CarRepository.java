@@ -22,6 +22,7 @@ public class CarRepository implements Repository<Car> {
 
     /**
      * Creates car from one line of the result set
+     *
      * @param set to create car with
      * @return created car
      */
@@ -34,8 +35,25 @@ public class CarRepository implements Repository<Car> {
                 set.getInt(5)
         );
     }
+
     /**
-     * Method helps to execute cuery with ONE result of single int and return it
+     * prepares statement based on the car value
+     * statement passed as argument WILL BE MODIFIED
+     *
+     * @param statement to modify. Order must maintained: brand, power, year, student id
+     * @param car       car to use for statement preparing
+     * @return statement with modification
+     */
+    private PreparedStatement prepareStatement(PreparedStatement statement, Car car) throws SQLException {
+        statement.setString(1, car.getBrand());
+        statement.setInt(2, car.getPower());
+        statement.setInt(3, car.getYear().getValue());
+        statement.setInt(4, car.getIdStudent());
+        return statement;
+    }
+
+    /**
+     * Method helps to execute query with ONE result of single int and return it
      *
      * @param query to execute
      * @return int that got from DB or 0 if nothing
@@ -51,14 +69,32 @@ public class CarRepository implements Repository<Car> {
         }
         return resultInt;
     }
+
     @Override
-    public boolean add(Car elem) {
-        return false;
+    public boolean add(Car carToAdd) {
+        String queryToAdd = "INSERT INTO auto(brand,power,year,id_s) values(?,?,?,?)";
+        int updateExecuted = -1; // to show that update failed, if it has failed
+
+        try (PreparedStatement statement = connection.prepareStatement(queryToAdd)) {
+            prepareStatement(statement, carToAdd);
+            updateExecuted = statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return updateExecuted > 0;
     }
 
     @Override
     public Car delete(int elemId) {
-        return null;
+        Car deletedCar = takeData(elemId);
+        String queryToDelete = "DELETE FROM auto WHERE auto.id=?";
+        try(PreparedStatement statement = connection.prepareStatement(queryToDelete)){
+            statement.setInt(1,elemId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return deletedCar;
     }
 
     @Override
@@ -67,8 +103,8 @@ public class CarRepository implements Repository<Car> {
         Collection<Car> cars = new ArrayList<>();
         try (Statement statement = connection.createStatement()) {
             ResultSet carsSet = statement.executeQuery(query);
-            while(carsSet.next()){
-               cars.add(carFactory(carsSet));
+            while (carsSet.next()) {
+                cars.add(carFactory(carsSet));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -78,6 +114,7 @@ public class CarRepository implements Repository<Car> {
 
     /**
      * gets car with matching id
+     *
      * @param elemId id of the element to take
      * @return If there are several cars last one with matching id if none null
      */
@@ -85,10 +122,10 @@ public class CarRepository implements Repository<Car> {
     public Car takeData(int elemId) {
         String query = "SELECT * FROM auto WHERE id=?";
         Car car = null;
-        try(PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1,elemId);
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, elemId);
             ResultSet setCar = statement.executeQuery();
-            while(setCar.next()){
+            while (setCar.next()) {
                 car = carFactory(setCar);
             }
         } catch (SQLException e) {
