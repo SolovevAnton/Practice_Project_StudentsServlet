@@ -26,7 +26,7 @@ public class StudentRepository implements Repository<Student>, AutoCloseable {
      * @param resultSet to create student from
      * @return created student
      */
-    private static Student studentFactory(ResultSet resultSet) throws SQLException {
+    private Student studentFactory(ResultSet resultSet) throws SQLException {
         Student student = new Student();
         student.setId(resultSet.getInt(1));
         student.setName(resultSet.getString(2));
@@ -43,15 +43,15 @@ public class StudentRepository implements Repository<Student>, AutoCloseable {
      * @return int that got from DB or 0 if nothing
      */
     private int gettingOneLineIntFromDB(String query) {
-        int maxId = 0;
+        int resultInt = 0;
         try (PreparedStatement preparedStatement = this.connection.prepareStatement(query)) {
             ResultSet result = preparedStatement.executeQuery();
             result.next();
-            maxId = result.getInt(1);
+            resultInt = result.getInt(1);
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return maxId;
+        return resultInt;
     }
 
     @Override
@@ -158,6 +158,7 @@ public class StudentRepository implements Repository<Student>, AutoCloseable {
             try {
                 this.connection.close();
             } catch (SQLException ignored) {
+
             }
     }
 }

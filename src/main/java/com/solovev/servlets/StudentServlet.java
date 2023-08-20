@@ -13,11 +13,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Collection;
 
 @WebServlet("/students")
-public class StudentServlet extends HttpServlet {
+public class StudentServlet extends HttpServlet { //todo add try with resources
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final String messageNoId = "Please provide object ID";
 
@@ -64,10 +63,9 @@ public class StudentServlet extends HttpServlet {
         req.setCharacterEncoding("utf-8");
         resp.setCharacterEncoding("utf-8");
         resp.setContentType("application/json;charset=utf-8");
-
-        Repository<Student> repo = new StudentRepository();
         ResponseResult<Student> responseResult = new ResponseResult<>();
-        try {
+
+        try (Repository<Student> repo = new StudentRepository()){
             Student studentToAdd = "application/json".equals(req.getHeader("Content-Type")) ?
                     objectMapper.readValue(req.getReader(), Student.class)
                     : studentCreator(req);
@@ -76,6 +74,8 @@ public class StudentServlet extends HttpServlet {
             }
         } catch (NumberFormatException | JsonParseException | SQLException e) {
             responseResult.setMessage("Error: " + e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
         resp.getWriter().write(responseResult.jsonToString());
     }

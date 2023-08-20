@@ -41,7 +41,6 @@ class StudentRepositoryTest {
 
     @Test
     void addAndDeleteTestNormal() throws ClassNotFoundException, SQLException {
-        Class.forName("com.mysql.cj.jdbc.Driver");
         String findStas = "SELECT * FROM students WHERE fio='Stas'";
         Student studentToAdd = new Student(4, "Stas", 25, 104, 1600.00);
 
