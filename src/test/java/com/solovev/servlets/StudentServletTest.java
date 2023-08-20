@@ -295,8 +295,8 @@ public class StudentServletTest {
             Student studentToAdd = new Student(-1, "added", 20, new Random().nextInt(), 1000);
 
             Repository<Student> realRepo = new StudentRepository();
-            Student studentToReplace = new Student();
-            studentToReplace.setNum(new Random().nextInt()); // in very rare cases this test might not run due to this student already is presented in real repo
+            Student studentToReplace = new Student(-1, "tobeReplaced", 30, new Random().nextInt(), 2000);// in very rare cases this test might not run due to this student already is presented in real repo
+
             Assumptions.assumeTrue(realRepo.add(studentToReplace));
             idDelete = studentToReplace.getId();
             assertFalse(new StudentRepository().takeData().contains(studentToIgnore)); //Test will Fail if car already exits, so the AfterEach cleaner will be executed!
@@ -340,8 +340,8 @@ public class StudentServletTest {
         @MethodSource("studentProvider")
         void doPutMainScenario(Student studentToAdd) throws IOException, ServletException, SQLException {
             Repository<Student> realRepo = new StudentRepository();
-            Student studentToReplace = new Student();
-            studentToReplace.setNum(new Random().nextInt()); // in very rare cases this test might not run due to this student already is presented in real repo
+            Student studentToReplace = new Student(-1,"toReplace",new Random().nextInt(),500,8000);// in very rare cases this test might not run due to this student already is presented in real repo
+
             Assumptions.assumeTrue(realRepo.add(studentToReplace));
             idDelete = studentToReplace.getId();
             assertFalse(new StudentRepository().takeData().contains(studentToAdd)); //Test will Fail if student already exits, so the AfterEach cleaner will be executed!
@@ -371,8 +371,7 @@ public class StudentServletTest {
         @MethodSource("studentProvider")
         void doPutMainJson(Student studentToAdd) throws IOException, ServletException, SQLException {
             Repository<Student> realRepo = new StudentRepository();
-            Student studentToReplace = new Student();
-            studentToReplace.setNum(new Random().nextInt()); // in very rare cases this test might not run due to this student already is presented in real repo
+            Student studentToReplace = new Student(-1,"toReplace",new Random().nextInt(),500,8000);// in very rare cases this test might not run due to this student already is presented in real repo
             Assumptions.assumeTrue(realRepo.add(studentToReplace));
             idDelete = studentToReplace.getId();
             assertFalse(new StudentRepository().takeData().contains(studentToAdd)); //Test will Fail if student already exits, so the AfterEach cleaner will be executed!
@@ -406,24 +405,15 @@ public class StudentServletTest {
         private static List<Student> studentProvider() {
             //to all students id will be added
             Random rand = new Random();
-            Student emptyStudent = new Student();
 
-            Student onlyAge = new Student();
-            onlyAge.setAge(5);
-
-            Student onlyName = new Student();
-            onlyName.setName("OnlyName");
-            Student nameAge = new Student();
-            nameAge.setName("NameAge");
-            nameAge.setAge(10);
-            Student nameAgeNum = new Student();
-            nameAgeNum.setName("nameAgeNum");
-            nameAgeNum.setAge(15);
-            nameAgeNum.setNum(rand.nextInt());
+            Student nameNumSalary = new Student();
+            nameNumSalary.setName("nameNumSalary");
+            nameNumSalary.setNum(rand.nextInt());
+            nameNumSalary.setSalary(2500.00);
 
             Student full = new Student(-1, "Full", 20, rand.nextInt(), rand.nextInt());
 
-            return List.of(emptyStudent, onlyAge,nameAge, onlyName, nameAgeNum, full);
+            return List.of(nameNumSalary, full);
         }
 
         private int idDelete;
@@ -572,8 +562,7 @@ public class StudentServletTest {
         @Test
         void doDeleteMainScenario() throws IOException, SQLException {
             Repository<Student> realRepo = new StudentRepository();
-            Student studentToTempAdd = new Student();
-            studentToTempAdd.setNum(new Random().nextInt()); // in very rare cases this test might fail due to this student already is presented in real repo
+            Student studentToTempAdd = new Student(-1, "added", 20, new Random().nextInt(), 1000); //in very rare cases this test might fail due to this student already is presented in real repo
             Assumptions.assumeTrue(realRepo.add(studentToTempAdd));
 
             when(request.getParameter("id")).thenReturn(String.valueOf(studentToTempAdd.getId()));
