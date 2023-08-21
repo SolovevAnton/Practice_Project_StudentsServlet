@@ -72,7 +72,7 @@ public class CarServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         config(req, resp);
-//returns car or all if id null, else throws
+        //returns car or all if id null, else throws
         String stringId = req.getParameter("id");
         if (stringId != null) {
             try {

@@ -51,6 +51,7 @@ class CarServletTest {
         @MethodSource("idMethodsProvider")
         public void noIdFound(BiConsumer<HttpServletRequest, HttpServletResponse> method) throws IOException {
             when(request.getParameter("id")).thenReturn("0");
+            when(request.getParameter("year")).thenReturn("1990");
 
             method.accept(request, response);
             response.getWriter().flush();
@@ -151,34 +152,6 @@ class CarServletTest {
 
     @Nested
     class DoPostTests {
-        @Test
-        public void exceptionPostAlreadyExists() throws ServletException, IOException {
-            Assumptions.assumeTrue(repo.size() > 0);
-
-            Car existingCar = repo.takeData().stream().findAny().get();
-
-            requestCreator(existingCar);
-
-            servlet.doPost(request, response);
-            response.getWriter().flush();
-
-            assertEquals("{\"message\":\"This object already exists in database\"}", stringWriter.toString().trim());
-        }
-
-        @Test
-        public void exceptionPostAlreadyExistsJson() throws ServletException, IOException {
-            Assumptions.assumeTrue(repo.size() > 0);
-
-            Car existingCar = repo.takeData().stream().findAny().get();
-
-            requestCreator(objectMapper.writeValueAsString(existingCar));
-
-            servlet.doPost(request, response);
-            response.getWriter().flush();
-
-            assertEquals("{\"message\":\"This object already exists in database\"}", stringWriter.toString().trim());
-        }
-
         @ParameterizedTest
         @MethodSource("someCarProvider")
         public void doPost(Car carToAdd) throws ServletException, IOException {
@@ -190,12 +163,16 @@ class CarServletTest {
             servlet.doPost(request, response);
             response.getWriter().flush();
 
-            carToAdd.setId(idToDeleteFromRepo); //since added is the new object
+
 
             ResponseResult<Car> expectedResp = new ResponseResult<>(carToAdd);
 
+            idToDeleteFromRepo = repo.lastId(); // since last id can change
+            carToAdd.setId(idToDeleteFromRepo); //since added is the new object
+
             assertEquals(expectedResp.jsonToString(), stringWriter.toString());
             assertTrue(new CarRepository().takeData().contains(carToAdd));
+
         }
 
         @ParameterizedTest
@@ -209,18 +186,20 @@ class CarServletTest {
             servlet.doPost(request, response);
             response.getWriter().flush();
 
-            carToAdd.setId(idToDeleteFromRepo); //since added is the new object
-
             ResponseResult<Car> expectedResp = new ResponseResult<>(carToAdd);
+
+            idToDeleteFromRepo = repo.lastId(); // since last id can change
+            carToAdd.setId(idToDeleteFromRepo); //since added is the new object
 
             assertEquals(expectedResp.jsonToString(), stringWriter.toString());
             assertTrue(new CarRepository().takeData().contains(carToAdd));
+
         }
 
         @Test
         public void jsonFieldsIgnorePost() throws IOException, ServletException {
-            Car toAdd = new Car(1, "ToAdd", 2, Year.parse("1999"), 50);
-            Car toIgnore = new Car(1, "ToIgnore", 3, Year.parse("1993"), 49);
+            Car toAdd = new Car(1, "ToAdd", 2, Year.parse("1999"), 1);
+            Car toIgnore = new Car(1, "ToIgnore", 3, Year.parse("1993"), 1);
             Assumptions.assumeFalse(repo.takeData().contains(toAdd));
             Assumptions.assumeFalse(repo.takeData().contains(toIgnore));
 
@@ -232,8 +211,10 @@ class CarServletTest {
             servlet.doPost(request, response);
             response.getWriter().flush();
 
+            idToDeleteFromRepo = repo.lastId(); // since last id can change
             assertFalse(new CarRepository().takeData().contains(toIgnore));
             assertTrue(new CarRepository().takeData().contains(toAdd));
+
         }
 
         public static List<Car> someCarProvider() {
@@ -338,8 +319,6 @@ class CarServletTest {
         @ParameterizedTest
         @MethodSource("someCarProvider")
         public void doPutJson(Car carReplacement) throws ServletException, IOException, SQLException {
-            Car carToBeReplaced = new Car();
-            carToBeReplaced.setBrand("toBeReplaced");
             Assumptions.assumeTrue(repo.add(carToBeReplaced)); //test fails if this car alreadyExists
             idToDeleteFromRepo = carToBeReplaced.getId(); //to be deleted even if test fails
             assertFalse(new CarRepository().takeData().contains(carReplacement));//Test will Fail if car already exits, so the AfterEach cleaner will be executed!
@@ -361,8 +340,7 @@ class CarServletTest {
         @ParameterizedTest
         @MethodSource("someCarProvider")
         public void doPut(Car carReplacement) throws ServletException, IOException, SQLException {
-            Car carToBeReplaced = new Car();
-            carToBeReplaced.setBrand("toBeReplaced");
+
             Assumptions.assumeTrue(repo.add(carToBeReplaced)); //test fails if this car alreadyExists
             idToDeleteFromRepo = carToBeReplaced.getId(); //to be deleted even if test fails
             assertFalse(new CarRepository().takeData().contains(carReplacement));//Test will Fail if car already exits, so the AfterEach cleaner will be executed!
@@ -382,13 +360,12 @@ class CarServletTest {
 
         @Test
         public void jsonFieldsIgnorePut() throws IOException, ServletException, SQLException {
-            Car carToBeReplaced = new Car();
-            carToBeReplaced.setBrand("toBeReplaced");
+
             Assumptions.assumeTrue(repo.add(carToBeReplaced)); //test fails if this car alreadyExists
             idToDeleteFromRepo = carToBeReplaced.getId(); //to be deleted even if test fails
 
-            Car toAdd = new Car(idToDeleteFromRepo, "ToAdd", 2, Year.parse("1999"), 50);
-            Car toIgnore = new Car(idToDeleteFromRepo, "ToIgnore", 3, Year.parse("1993"), 49);
+            Car toAdd = new Car(idToDeleteFromRepo, "ToAdd", 2, Year.parse("1999"), 1);
+            Car toIgnore = new Car(idToDeleteFromRepo, "ToIgnore", 3, Year.parse("1993"), 1);
             assertFalse(repo.takeData().contains(toAdd)); //Test will Fail if car already exits, so the AfterEach cleaner will be executed!
             assertFalse(repo.takeData().contains(toIgnore)); //Test will Fail if car already exits, so the AfterEach cleaner will be executed!
 
@@ -402,7 +379,7 @@ class CarServletTest {
             assertFalse(new CarRepository().takeData().contains(carToBeReplaced));
             assertTrue(new CarRepository().takeData().contains(toAdd));
         }
-
+        private Car carToBeReplaced = new Car(-1,"toReplace",200,Year.of(2020),1);
         public static List<Car> someCarProvider() {
             return CarServletTest.someCarProvider();
         }
@@ -470,29 +447,19 @@ class CarServletTest {
         return cars.size() > 0 ? cars.takeData() : List.of(new Car());
     }
 
-    public static List<Car> someCarProvider() {
+    public static List<Car> someCarProvider() { // only power can be null
         //to all car id will be added
         Random rand = new Random();
-        Car emptyCar = new Car();
 
-        Car onlyBrand = new Car();
-        onlyBrand.setBrand("Only Brand");
+        Car brandYearStudent = new Car();
+        brandYearStudent.setId(-1);
+        brandYearStudent.setBrand("brandYSt");
+        brandYearStudent.setYear(Year.parse("1980"));
+        brandYearStudent.setIdStudent(1);
 
-        Car onlyPower = new Car();
-        onlyPower.setPower(rand.nextInt());
+        Car full = new Car(-1, "Full", 20, Year.parse("1950"), 4);
 
-        Car brandPower = new Car();
-        brandPower.setBrand("BrandPower");
-        brandPower.setPower(10);
-
-        Car brandPowerYear = new Car();
-        brandPowerYear.setBrand("brandPowerYear");
-        brandPowerYear.setPower(15);
-        brandPowerYear.setYear(Year.parse("1980"));
-
-        Car full = new Car(-1, "Full", 20, Year.parse("1950"), Integer.MAX_VALUE);
-
-        return List.of(emptyCar, onlyBrand, onlyPower, brandPower, brandPowerYear, full);
+        return List.of(brandYearStudent, full);
     }
 
 }

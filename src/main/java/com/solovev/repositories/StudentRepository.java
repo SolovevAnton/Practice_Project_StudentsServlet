@@ -64,6 +64,7 @@ public class StudentRepository implements Repository<Student>, AutoCloseable {
             preparedStatement.setDouble(4, student.getSalary());
 
             int row = preparedStatement.executeUpdate();
+            student.setId(lastId()); //update student id
             if (row <= 0) {
                 return false;
             }
@@ -129,7 +130,7 @@ public class StudentRepository implements Repository<Student>, AutoCloseable {
         try (PreparedStatement preparedStatement = this.connection.prepareStatement(sql)) {
             preparedStatement.setString(1, student.getName());
             preparedStatement.setInt(2, student.getAge());
-            preparedStatement.setInt(3, (int) student.getNum());
+            preparedStatement.setInt(3, student.getNum());
             preparedStatement.setDouble(4, student.getSalary());
             preparedStatement.setInt(5, student.getId());
             return preparedStatement.executeUpdate() > 0;

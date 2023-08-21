@@ -78,6 +78,7 @@ public class CarRepository implements Repository<Car> {
         try (PreparedStatement statement = connection.prepareStatement(queryToAdd)) {
             prepareStatement(statement, carToAdd);
             updateExecuted = statement.executeUpdate();
+            carToAdd.setId(lastId()); //update car id
         } catch (SQLException e) {
             e.printStackTrace();
         }
