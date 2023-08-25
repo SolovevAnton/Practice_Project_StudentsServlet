@@ -20,6 +20,43 @@ public class StudentServlet extends HttpServlet { //todo add try with resources
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final String messageNoId = "Please provide object ID";
 
+    /**
+     * Checks if request contains json or not
+     *
+     * @param req to check
+     * @return true if is json false otherwise
+     */
+    private boolean isJson(HttpServletRequest req) {
+        String header = req.getHeader("Content-Type");
+        return header != null && header.contains("application/json");
+    }
+
+    /**
+     * Creates student based on given parameters of the request, if they are presented
+     * Note: Name, num  and salary cannot be nulls!
+     *
+     * @param req to take param from
+     * @return modified student
+     * @throws NumberFormatException if one of the parsed number parameters cannot be parsed
+     */
+    private Student studentCreator(HttpServletRequest req) throws NumberFormatException {
+        Student student = new Student();
+        if (req.getParameter("name") != null) {
+            student.setName(req.getParameter("name"));
+        }
+
+        if (req.getParameter("age") != null) {
+            student.setAge(Integer.parseInt(req.getParameter("age")));
+        }
+        if (req.getParameter("num") != null) {
+            student.setNum(Integer.parseInt(req.getParameter("num")));
+        }
+        if (req.getParameter("salary") != null) {
+            student.setSalary(Double.parseDouble(req.getParameter("salary")));
+        }
+        return student;
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         req.setCharacterEncoding("utf-8");
@@ -65,8 +102,8 @@ public class StudentServlet extends HttpServlet { //todo add try with resources
         resp.setContentType("application/json;charset=utf-8");
         ResponseResult<Student> responseResult = new ResponseResult<>();
 
-        try (Repository<Student> repo = new StudentRepository()){
-            Student studentToAdd = "application/json".equals(req.getHeader("Content-Type")) ?
+        try (Repository<Student> repo = new StudentRepository()) {
+            Student studentToAdd = isJson(req) ?
                     objectMapper.readValue(req.getReader(), Student.class)
                     : studentCreator(req);
             if (repo.add(studentToAdd)) {
@@ -98,7 +135,7 @@ public class StudentServlet extends HttpServlet { //todo add try with resources
 
         ResponseResult<Student> responseResult = new ResponseResult<>();
         String idString = req.getParameter("id");
-        boolean isJson = "application/json".equals(req.getHeader("Content-Type"));
+        boolean isJson = isJson(req);
 
         if (idString != null || isJson) {
             try {
@@ -159,28 +196,5 @@ public class StudentServlet extends HttpServlet { //todo add try with resources
         resp.getWriter().write(responseResult.jsonToString());
     }
 
-    /**
-     * Creates student based on given parameters of the request, if they are presented
-     * Note: Name, num  and salary cannot be nulls!
-     * @param req to take param from
-     * @return modified student
-     * @throws NumberFormatException if one of the parsed number parameters cannot be parsed
-     */
-    private Student studentCreator(HttpServletRequest req) throws NumberFormatException {
-        Student student = new Student();
-        if (req.getParameter("name") != null) {
-            student.setName(req.getParameter("name"));
-        }
 
-        if (req.getParameter("age") != null) {
-            student.setAge(Integer.parseInt(req.getParameter("age")));
-        }
-        if (req.getParameter("num") != null) {
-            student.setNum(Integer.parseInt(req.getParameter("num")));
-        }
-        if (req.getParameter("salary") != null) {
-            student.setSalary(Double.parseDouble(req.getParameter("salary")));
-        }
-        return student;
-    }
 }

@@ -29,7 +29,16 @@ public class CarServlet extends HttpServlet {
     private String notFoundIdMessage(String id) {
         return "Cannot find object with this ID: " + id;
     }
-
+    /**
+     * Checks if request contains json or not
+     *
+     * @param req to check
+     * @return true if is json false otherwise
+     */
+    private boolean isJson(HttpServletRequest req) {
+        String header = req.getHeader("Content-Type");
+        return header != null && header.contains("application/json");
+    }
     /**
      * Configs resp and req to use UTF-8, also reloads repository
      *
@@ -108,7 +117,7 @@ public class CarServlet extends HttpServlet {
         //returns posted car
 
         try {
-            Car carToAdd = "application/json".equals(req.getHeader("Content-Type"))
+            Car carToAdd = isJson(req)
                     ? objectMapper.readValue(req.getReader(), Car.class)
                     : carCreator(req);
             if (repo.add(carToAdd)) {
@@ -161,7 +170,7 @@ public class CarServlet extends HttpServlet {
         config(req, resp);
         //returns replaced car or error msg
         String stringId = req.getParameter("id");
-        boolean isJson = "application/json".equals(req.getHeader("Content-Type"));
+        boolean isJson = isJson(req);
 
         if (stringId != null || isJson) {
             try {
