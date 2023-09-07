@@ -16,4 +16,6 @@ public interface Repository<T> extends AutoCloseable{
      */
     int lastId();
 
+    @Override
+    void close();
 }

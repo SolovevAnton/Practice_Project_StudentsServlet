@@ -84,7 +84,7 @@ public class StudentServletTest {
             servlet.doPost(request, response);
             writer.flush();
 
-            assertEquals("{\"message\":\"Error: java.sql.SQLIntegrityConstraintViolationException: Column 'fio' cannot be null\"}", stringWriter.toString().trim());
+            assertEquals("{\"message\":\"Cannot add student since constraint violated in DB\"}", stringWriter.toString().trim());
         }        @Test
         void doPostConstrainViolationNotUniqueNum() throws IOException {
             when(request.getParameter("name")).thenReturn("num");
@@ -99,7 +99,7 @@ public class StudentServletTest {
             servlet.doPost(request, response);
             writer.flush();
 
-            assertEquals("{\"message\":\"Error: java.sql.SQLIntegrityConstraintViolationException: Duplicate entry '100' for key 'students.num'\"}", stringWriter.toString().trim());
+            assertEquals("{\"message\":\"Cannot add student since constraint violated in DB\"}", stringWriter.toString().trim());
         }
 
 
@@ -232,7 +232,7 @@ public class StudentServletTest {
             servlet.doPut(request, response);
             response.getWriter().flush();
 
-            assertEquals("{\"message\":\"Cannot find object with this ID\"}", stringWriter.toString().trim());
+            assertEquals("{\"message\":\"Cannot find object with this ID or DB constrain violated\"}", stringWriter.toString().trim());
         }
         @Test
         public void putNoId() throws ServletException, IOException {
@@ -252,7 +252,7 @@ public class StudentServletTest {
             servlet.doPut(request, response);
             response.getWriter().flush();
 
-            assertEquals("{\"message\":\"Cannot find object with this ID\"}", stringWriter.toString().trim());
+            assertEquals("{\"message\":\"Cannot find object with this ID or DB constrain violated\"}", stringWriter.toString().trim());
         }
 
         @Test

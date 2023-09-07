@@ -64,27 +64,30 @@ public class StudentServlet extends HttpServlet { //todo add try with resources
         resp.setContentType("application/json;charset=utf-8");
 
         String idString = req.getParameter("id");
-        Repository<Student> repo = new StudentRepository();
+        try (Repository<Student> repo = new StudentRepository()) {
 
-        if (idString != null) {
-            ResponseResult<Student> result = new ResponseResult<>();
-            try {
-                int id = Integer.parseInt(idString);
-                Student foundStudent = repo.takeData(id);
+            if (idString != null) {
+                ResponseResult<Student> result = new ResponseResult<>();
+                try {
+                    int id = Integer.parseInt(idString);
+                    Student foundStudent = repo.takeData(id);
 
-                if (foundStudent != null) {
-                    result.setData(repo.takeData(id));
-                } else {
-                    result.setMessage("Cannot find object with this ID");
+                    if (foundStudent != null) {
+                        result.setData(repo.takeData(id));
+                    } else {
+                        result.setMessage("Cannot find object with this ID");
+                    }
+                } catch (NumberFormatException e) {
+                    result.setMessage(e + " Id must be an integer");
                 }
-            } catch (NumberFormatException e) {
-                result.setMessage(e + " Id must be an integer");
+                resp.getWriter().write(result.jsonToString());
+            } else {
+                ResponseResult<Collection<Student>> result = new ResponseResult<>();
+                result.setData(repo.takeData());
+                resp.getWriter().write(result.jsonToString());
             }
-            resp.getWriter().write(result.jsonToString());
-        } else {
-            ResponseResult<Collection<Student>> result = new ResponseResult<>();
-            result.setData(repo.takeData());
-            resp.getWriter().write(result.jsonToString());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -109,12 +112,10 @@ public class StudentServlet extends HttpServlet { //todo add try with resources
             if (repo.add(studentToAdd)) {
                 responseResult.setData(studentToAdd);
             } else {
-                responseResult.setMessage("Un able to update user since this user present in DB (Constrain violated)");
+                responseResult.setMessage("Cannot add student since constraint violated in DB");
             }
         } catch (NumberFormatException | JsonParseException e) {
             responseResult.setMessage("Error: " + e);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
         resp.getWriter().write(responseResult.jsonToString());
     }
@@ -140,8 +141,7 @@ public class StudentServlet extends HttpServlet { //todo add try with resources
         boolean isJson = isJson(req);
 
         if (idString != null || isJson) {
-            try {
-                Repository<Student> repo = new StudentRepository();
+            try (Repository<Student> repo = new StudentRepository()) {
                 int id;
                 Student studentToCreate;
 
@@ -157,7 +157,7 @@ public class StudentServlet extends HttpServlet { //todo add try with resources
                 if (repo.replace(studentToCreate)) {
                     responseResult.setData(studentToReplace);
                 } else {
-                    responseResult.setMessage("Cannot find object with this ID");
+                    responseResult.setMessage("Cannot find object with this ID or DB constrain violated");
                 }
             } catch (NumberFormatException | JsonParseException e) {
                 responseResult.setMessage("Error: " + e);
@@ -180,8 +180,7 @@ public class StudentServlet extends HttpServlet { //todo add try with resources
         String idString = req.getParameter("id");
 
         if (idString != null) {
-            try {
-                Repository<Student> repo = new StudentRepository();
+            try (Repository<Student> repo = new StudentRepository()) {
                 int id = Integer.parseInt(idString);
                 Student student = repo.delete(id);
                 if (student != null) {
