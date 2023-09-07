@@ -120,14 +120,14 @@ public class CarServlet extends HttpServlet {
             Car carToAdd = isJson(req)
                     ? objectMapper.readValue(req.getReader(), Car.class)
                     : carCreator(req);
+
             if (repo.add(carToAdd)) {
                 responseResult.setData(carToAdd);
             } else {
                 responseResult.setMessage("This object already exists in database");
             }
-        } catch (NumberFormatException | DateTimeParseException | JsonParseException | SQLException e) {
-            responseResult.setMessage("Error: " + e);
-        }
+        } catch (NumberFormatException | DateTimeParseException | JsonParseException e) {
+            responseResult.setMessage("Error: " + e);}
 
         resp.getWriter().write(responseResult.jsonToString());
     }

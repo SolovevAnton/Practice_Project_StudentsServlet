@@ -108,8 +108,10 @@ public class StudentServlet extends HttpServlet { //todo add try with resources
                     : studentCreator(req);
             if (repo.add(studentToAdd)) {
                 responseResult.setData(studentToAdd);
+            } else {
+                responseResult.setMessage("Un able to update user since this user present in DB (Constrain violated)");
             }
-        } catch (NumberFormatException | JsonParseException | SQLException e) {
+        } catch (NumberFormatException | JsonParseException e) {
             responseResult.setMessage("Error: " + e);
         } catch (Exception e) {
             throw new RuntimeException(e);

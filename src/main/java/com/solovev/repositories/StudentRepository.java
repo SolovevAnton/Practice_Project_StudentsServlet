@@ -55,7 +55,7 @@ public class StudentRepository implements Repository<Student>, AutoCloseable {
     }
 
     @Override
-    public boolean add(Student student) throws SQLException { //todo how to autodecrement?
+    public boolean add(Student student) { //todo how to autodecrement?
         String sql = "insert into students(fio,age,num,salary) values (?,?,?,?)";
         try (PreparedStatement preparedStatement = this.connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, student.getName());
@@ -74,6 +74,8 @@ public class StudentRepository implements Repository<Student>, AutoCloseable {
                     student.setId(generatedKeys.getInt(1));
             }
             return true;
+        } catch (SQLException ignored){
+            return false;
         }
     }
 

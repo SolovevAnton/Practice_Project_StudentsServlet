@@ -47,7 +47,7 @@ public class CarRepository implements Repository<Car> {
     private PreparedStatement prepareStatement(PreparedStatement statement, Car car) throws SQLException {
         statement.setString(1, car.getBrand());
         statement.setInt(2, car.getPower());
-        statement.setInt(3, car.getYear().getValue());
+        statement.setInt(3, car.getYear() != null ? car.getYear().getValue() : 0); //todo refactor
         statement.setInt(4, car.getIdStudent());
         return statement;
     }
