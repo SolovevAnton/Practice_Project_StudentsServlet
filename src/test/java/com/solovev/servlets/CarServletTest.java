@@ -112,7 +112,7 @@ class CarServletTest {
         }
 
         public static List<BiConsumer<HttpServletRequest, HttpServletResponse>> idMethodsProvider() {
-            return List.of(doGet, doDelete, doPut);
+            return List.of(doGet, doDelete);
         }
 
         public static List<BiConsumer<HttpServletRequest, HttpServletResponse>> creatingCarMethodsProvider() {
@@ -162,7 +162,6 @@ class CarServletTest {
 
             servlet.doPost(request, response);
             response.getWriter().flush();
-
 
 
             ResponseResult<Car> expectedResp = new ResponseResult<>(carToAdd);
@@ -216,6 +215,24 @@ class CarServletTest {
             assertFalse(new CarRepository().takeData().contains(toIgnore));
             assertTrue(new CarRepository().takeData().contains(toAdd));
 
+        }
+
+        @Test
+        public void postConstrainViolation() throws IOException, ServletException {
+            Car corrupted = new Car();
+            Assumptions.assumeFalse(repo.takeData().contains(corrupted));
+
+            idToDeleteFromRepo = repo.lastId() + 1; // +1 since value can be added
+
+            requestCreator(corrupted);
+            requestCreator(objectMapper.writeValueAsString(corrupted));
+
+            servlet.doPost(request, response);
+            response.getWriter().flush();
+
+            assertFalse(new CarRepository().takeData().contains(corrupted));
+
+            assertEquals("{\"message\":\"Cannot add car since constraint violated in DB\"}", stringWriter.toString().trim());
         }
 
         public static List<Car> someCarProvider() {
@@ -297,7 +314,7 @@ class CarServletTest {
         @Test
         public void noIdFoundJsonPut() throws ServletException, IOException {
             Car carNoId = new Car(0, "NoID", 200, Year.of(1111), 999);
-            ResponseResult<Car> expectedResp = new ResponseResult<>("Cannot find object with this ID: " + carNoId.getId());
+            ResponseResult<Car> expectedResp = new ResponseResult<>("Cannot find object with this ID: 0 or DB constrain violated");
             requestCreator(objectMapper.writeValueAsString(carNoId));
 
             servlet.doPut(request, response);
@@ -380,7 +397,31 @@ class CarServletTest {
             assertFalse(new CarRepository().takeData().contains(carToBeReplaced));
             assertTrue(new CarRepository().takeData().contains(toAdd));
         }
-        private Car carToBeReplaced = new Car(-1,"toReplace",200,Year.of(2020),1);
+
+        @Test
+        public void constrainViolation() throws IOException {
+            Car corrupted = new Car();
+            Assumptions.assumeTrue(repo.add(carToBeReplaced)); //test fails if this car alreadyExists
+            idToDeleteFromRepo = carToBeReplaced.getId(); //to be deleted even if test fails
+            assertFalse(new CarRepository().takeData().contains(corrupted));//Test will Fail if car already exits, so the AfterEach cleaner will be executed!
+
+            when(request.getParameter("id")).thenReturn(String.valueOf(idToDeleteFromRepo));
+            requestCreator(corrupted);
+
+            servlet.doPut(request, response);
+            response.getWriter().flush();
+
+            ResponseResult<Car> expectedResp = new ResponseResult<>("Cannot find object with this ID: " + idToDeleteFromRepo + " or DB constrain violated"); //MESSAGE CREATION
+
+            assertEquals(expectedResp.jsonToString(), stringWriter.toString());
+            assertEquals(carToBeReplaced, new CarRepository().takeData(idToDeleteFromRepo));
+            assertFalse(new CarRepository().takeData().contains(corrupted));
+
+
+        }
+
+        private Car carToBeReplaced = new Car(-1, "toReplace", 200, Year.of(2020), 1);
+
         public static List<Car> someCarProvider() {
             return CarServletTest.someCarProvider();
         }
@@ -393,7 +434,7 @@ class CarServletTest {
     private final Collection<Car> initialRepo; //to check if something has happened to initial repo
 
     {
-            initialRepo = new CarRepository().takeData();
+        initialRepo = new CarRepository().takeData();
 
     }
 

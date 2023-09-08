@@ -47,7 +47,7 @@ public class CarRepository implements Repository<Car> {
     private PreparedStatement prepareStatement(PreparedStatement statement, Car car) throws SQLException {
         statement.setString(1, car.getBrand());
         statement.setInt(2, car.getPower());
-        statement.setInt(3, car.getYear() != null ? car.getYear().getValue() : 0); //todo refactor
+        statement.setInt(3, car.getYear() != null ? car.getYear().getValue() : 0);
         statement.setInt(4, car.getIdStudent());
         return statement;
     }
@@ -79,8 +79,7 @@ public class CarRepository implements Repository<Car> {
             prepareStatement(statement, carToAdd);
             updateExecuted = statement.executeUpdate();
             carToAdd.setId(lastId()); //update car id
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException ignored) {
         }
         return updateExecuted > 0;
     }
@@ -138,15 +137,14 @@ public class CarRepository implements Repository<Car> {
     @Override
     public boolean replace(Car carToReplaceWith) {
         String sql = "UPDATE auto SET auto.brand=?, auto.power=?, auto.year=?, auto.id_s=? where auto.id=?";
-        int updateExecuted = -1; // to show that update failed, if it has failed
         try (PreparedStatement preparedStatement = this.connection.prepareStatement(sql)) {
             prepareStatement(preparedStatement, carToReplaceWith);
             preparedStatement.setInt(5, carToReplaceWith.getId());
-            updateExecuted = preparedStatement.executeUpdate();
+            //to show if update succeeded
+            return preparedStatement.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            return false;
         }
-        return updateExecuted > 0;
     }
 
     @Override

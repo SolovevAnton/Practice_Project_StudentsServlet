@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.time.Year;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -21,7 +20,7 @@ import java.util.Collection;
 
 @WebServlet("/cars")
 public class CarServlet extends HttpServlet {
-    private Repository<Car> repo;
+
     private ResponseResult<Car> responseResult;
     private final String messageNoId = "Please provide object ID";
     private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
@@ -29,6 +28,7 @@ public class CarServlet extends HttpServlet {
     private String notFoundIdMessage(String id) {
         return "Cannot find object with this ID: " + id;
     }
+
     /**
      * Checks if request contains json or not
      *
@@ -39,6 +39,7 @@ public class CarServlet extends HttpServlet {
         String header = req.getHeader("Content-Type");
         return header != null && header.contains("application/json");
     }
+
     /**
      * Configs resp and req to use UTF-8, also reloads repository
      *
@@ -49,7 +50,6 @@ public class CarServlet extends HttpServlet {
         req.setCharacterEncoding("utf-8");
         resp.setCharacterEncoding("utf-8");
         resp.setContentType("application/json;charset=utf-8");
-        repo = new CarRepository();
         responseResult = new ResponseResult<>();
     }
 
@@ -83,23 +83,25 @@ public class CarServlet extends HttpServlet {
         config(req, resp);
         //returns car or all if id null, else throws
         String stringId = req.getParameter("id");
-        if (stringId != null) {
-            try {
-                int id = Integer.parseInt(stringId);
-                Car carToReturn = repo.takeData(id);
-                if (carToReturn != null) {
-                    responseResult.setData(carToReturn);
-                } else {
-                    responseResult.setMessage(notFoundIdMessage(stringId));
+        try (Repository<Car> repo = new CarRepository()){
+            if (stringId != null) {
+                try {
+                    int id = Integer.parseInt(stringId);
+                    Car carToReturn = repo.takeData(id);
+                    if (carToReturn != null) {
+                        responseResult.setData(carToReturn);
+                    } else {
+                        responseResult.setMessage(notFoundIdMessage(stringId));
+                    }
+                } catch (NumberFormatException e) {
+                    responseResult.setMessage("Error: " + e);
                 }
-            } catch (NumberFormatException e) {
-                responseResult.setMessage("Error: " + e);
+                resp.getWriter().write(responseResult.jsonToString());
+            } else {
+                ResponseResult<Collection<Car>> allCarsResponse = new ResponseResult<>();
+                allCarsResponse.setData(repo.takeData());
+                resp.getWriter().write(allCarsResponse.jsonToString());
             }
-            resp.getWriter().write(responseResult.jsonToString());
-        } else {
-            ResponseResult<Collection<Car>> allCarsResponse = new ResponseResult<>();
-            allCarsResponse.setData(repo.takeData());
-            resp.getWriter().write(allCarsResponse.jsonToString());
         }
     }
 
@@ -115,8 +117,7 @@ public class CarServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         config(req, resp);
         //returns posted car
-
-        try {
+        try(Repository<Car> repo = new CarRepository()) {
             Car carToAdd = isJson(req)
                     ? objectMapper.readValue(req.getReader(), Car.class)
                     : carCreator(req);
@@ -124,10 +125,11 @@ public class CarServlet extends HttpServlet {
             if (repo.add(carToAdd)) {
                 responseResult.setData(carToAdd);
             } else {
-                responseResult.setMessage("This object already exists in database");
+                responseResult.setMessage("Cannot add car since constraint violated in DB");
             }
         } catch (NumberFormatException | DateTimeParseException | JsonParseException e) {
-            responseResult.setMessage("Error: " + e);}
+            responseResult.setMessage("Error: " + e);
+        }
 
         resp.getWriter().write(responseResult.jsonToString());
     }
@@ -138,7 +140,7 @@ public class CarServlet extends HttpServlet {
         String stringId = req.getParameter("id");
         //returns deleted car or throws
         if (stringId != null) {
-            try {
+            try (Repository<Car> repo = new CarRepository()){
                 int id = Integer.parseInt(stringId);
                 Car carDeleted = repo.delete(id);
                 if (carDeleted != null) {
@@ -158,7 +160,7 @@ public class CarServlet extends HttpServlet {
     }
 
     /**
-     * Updates student in the repo based on its id; if Id is not provided car with id 1 will be replaced!
+     * Updates student in the repo based on its id; if id is not provided car with id 1 will be replaced!
      * If it has json object all fields will be ignored;
      *
      * @param req  request must contain all fields with id
@@ -173,7 +175,7 @@ public class CarServlet extends HttpServlet {
         boolean isJson = isJson(req);
 
         if (stringId != null || isJson) {
-            try {
+            try (Repository<Car> repo = new CarRepository()){
                 Car carReplacement;
                 int id;
                 if (isJson) {
@@ -190,7 +192,7 @@ public class CarServlet extends HttpServlet {
                 if (repo.replace(carReplacement)) {
                     responseResult.setData(carReplaced);
                 } else {
-                    responseResult.setMessage(notFoundIdMessage(String.valueOf(id)));
+                    responseResult.setMessage(notFoundIdMessage(String.valueOf(id)) + " or DB constrain violated");
                 }
             } catch (NumberFormatException | DateTimeParseException | JsonParseException e) {
                 responseResult.setMessage("Error: " + e);

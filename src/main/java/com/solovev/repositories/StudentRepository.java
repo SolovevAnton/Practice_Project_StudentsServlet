@@ -10,7 +10,6 @@ import java.util.Collection;
 public class StudentRepository implements Repository<Student>, AutoCloseable {
     private Connection connection;
 
-    //todo how to test without real db??
     public StudentRepository() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
